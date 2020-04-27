@@ -4,12 +4,12 @@ import Memento
 import MathOptInterface
 import InfrastructureModels
 import WaterModels
-import PowerModels
+import PowerModelsDistribution
 
 const _MOI = MathOptInterface
 const _IM = InfrastructureModels
 const _WM = WaterModels
-const _PM = PowerModels
+const _PM = PowerModelsDistribution
 
 # Suppress warnings during testing.
 Memento.setlevel!(Memento.getlogger(_IM), "error")

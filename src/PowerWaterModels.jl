@@ -10,7 +10,7 @@ module PowerWaterModels
     const _MOI = MathOptInterface
     const _IM = InfrastructureModels
     const _WM = WaterModels
-    const _PMD = PowerModelsDistribution
+    const _PM = PowerModelsDistribution
 
     # Create our module level logger (this will get precompiled)
     const _LOGGER = Memento.getlogger(@__MODULE__)
@@ -31,4 +31,6 @@ module PowerWaterModels
     function logger_config!(level)
         Memento.config!(Memento.getlogger("PowerWaterModels"), level)
     end
+
+    include("core/base.jl")
 end
