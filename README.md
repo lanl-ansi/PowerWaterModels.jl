@@ -12,7 +12,7 @@ PowerWaterModels.jl is a Julia/JuMP Package for the joint optimization of power 
 * Optimal Power-Water Flow (opwf)
 
 **Core Network Formulations**
-* NCNLP - nonconvex nonlinear program
+* MINLP - mixed-integer nonconvex program
 
 ## Development
 Community-driven development and enhancement of PowerWaterModels is welcomed and encouraged.
@@ -27,5 +27,7 @@ PowerWaterModels.jl should be installed using the command
 ```
 
 ## Acknowledgments
-This work is conducted under the auspices of the National Nuclear Security Administration of the U.S. Department of Energy at Los Alamos National Laboratory under Contract No. 89233218CNA000001.
+This work is currently supported by the Advanced Grid Modeling Program within the U.S. Department of Energy under the project "Coordinated Planning and Operation of Water and Power Infrastructures for Increased Resilience and Reliability."
+Work at Los Alamos National Laboratory is conducted under the auspices of the National Nuclear Security Administration of the U.S. Department of Energy under Contract No. 89233218CNA000001.
+It is also supported by the [Advanced Network Science Initiative](https://lanl-ansi.github.io) at Los Alamos National Laboratory.
 The code is provided under a [modified BSD license](https://github.com/lanl-ansi/PowerWaterModels.jl/blob/master/LICENSE.md) as part of the Multi-Infrastructure Control and Optimization Toolkit (MICOT), LA-CC-13-108.

@@ -4,13 +4,15 @@ module PowerWaterModels
     import Memento
     import InfrastructureModels
     import MathOptInterface
-    import WaterModels
+    import PowerModels
     import PowerModelsDistribution
+    import WaterModels
 
     const _MOI = MathOptInterface
     const _IM = InfrastructureModels
+    const _PM = PowerModels
+    const _PMD = PowerModelsDistribution
     const _WM = WaterModels
-    const _PM = PowerModelsDistribution
 
     # Create our module level logger (this will get precompiled)
     const _LOGGER = Memento.getlogger(@__MODULE__)
@@ -33,4 +35,10 @@ module PowerWaterModels
     end
 
     include("core/base.jl")
+
+    include("prob/pwf.jl")
+    include("prob/opwf.jl")
+
+    # This must come last to support automated export.
+    include("core/export.jl")
 end
