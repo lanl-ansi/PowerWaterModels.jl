@@ -13,7 +13,7 @@ function instantiate_model(pdata::Dict{String,<:Any}, wdata::Dict{String,<:Any},
     wm = _WM.instantiate_model(wdata, wtype, m->nothing; ref_extensions=wm_ref_extensions, jump_model=pm.model)
 
     # Build the corresponding problem.
-    build_method(pm, wm, kwargs=kwargs)
+    build_method(pm, wm)
 
     # Return the two individual *Models objects.
     return pm, wm

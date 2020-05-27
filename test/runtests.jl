@@ -11,6 +11,7 @@ const _MOI = MathOptInterface
 const _IM = InfrastructureModels
 const _PM = PowerModels
 const _PMD = PowerModelsDistribution
+const _PWM = PowerWaterModels
 const _WM = WaterModels
 
 # Suppress warnings during testing.
