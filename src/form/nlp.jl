@@ -5,7 +5,7 @@ function constraint_pump_load(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterM
     coeff = inv(efficiency) * rho * gravity
     q, g = _WM.var(wm, wnw)[:qp][a], _WM.var(wm, wnw)[:g][a]
 
-    pump_power = JuMP.@NLexpression(pm.model, inv(pm.data["baseMVA"]) * 1.0e-6 * g * q^2)
+    pump_power = JuMP.@NLexpression(pm.model, inv(pm.data["baseMVA"]) * 1.0e-6 * g * q)
     pd = _PM.ref(pm, pnw, :load, i)["pd"]
     z = _PM.var(pm, pnw, :z_demand, i)
     JuMP.@NLconstraint(pm.model, pump_power == pd[1] * z)
