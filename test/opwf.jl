@@ -1,9 +1,14 @@
 @testset "Optimal Power-Water Flow Problems" begin
-    @testset "3-bus Balanced ACRPowerModel and MILPRWaterModel" begin
-        pfile = "$(pm_path)/test/data/opendss/case3_balanced.dss"
+    @testset "4-bus DCPPowerModel and MILPWaterModel" begin
+        pfile = "../test/data/matpower/case4.m"
         wfile = "$(wm_path)/test/data/epanet/example_1-sp.inp"
-        ptype, wtype = _PMD.ACRPowerModel, _WM.MILPRWaterModel
-        result = run_opwf(pfile, wfile, ptype, wtype, juniper)
+
+        pdata = _PM.parse_file(pfile)
+        pdata = _PWM.make_three_phase_power_network(pdata)
+        wdata = _WM.parse_file(wfile)
+
+        ptype, wtype = _PMD.DCPPowerModel, _WM.MILPWaterModel
+        result = run_opwf(pdata, wdata, ptype, wtype, juniper)
         @test result["termination_status"] == _MOI.LOCALLY_SOLVED
         @test isapprox(result["objective"], 0.0, atol=1.0e-6)
     end      

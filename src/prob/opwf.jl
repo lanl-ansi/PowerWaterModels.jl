@@ -8,10 +8,20 @@ end
 "Construct the optimal power-water flow problem."
 function build_opwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel; kwargs...)
     # Power-only related variables and constraints
-    _PMD.build_mc_opf(pm)
+    _PMD.build_mc_mld(pm)
 
     # Water-only related variables and constraints
-    _WM.build_owf(wm)
+    _WM.build_wf(wm)
+
+    for (i, load) in _PMD.ref(pm, :load)
+        a = _get_pump_from_load(pm, wm, i)
+
+        if a != nothing
+            constraint_pump_load(pm, wm, i, a)
+        else
+            constraint_fixed_load(pm, wm, i)
+        end
+    end
 
     # TODO: Add a constraint that minimizes total energy.
     JuMP.@objective(pm.model, _MOI.FEASIBILITY_SENSE, 0.0)
@@ -24,11 +34,11 @@ end
 
 "Construct the multinetwork optimal power-water flow problem."
 function build_mn_opwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel; kwargs...)
-    # Power-only related variables and constraints
-    _PMD.build_mc_opf(pm) # TODO: Construct a multinetwork opf.
-
     # Water-only related variables and constraints
     _WM.build_mn_owf(wm)
+
+    # Power-only related variables and constraints
+    _PMD.build_mc_mld(pm)
 
     # TODO: Add a constraint that minimizes total energy.
     JuMP.@objective(pm.model, _MOI.FEASIBILITY_SENSE, 0.0)
