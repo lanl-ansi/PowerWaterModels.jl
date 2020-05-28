@@ -6,11 +6,21 @@ end
 
 ""
 function instantiate_model(pdata::Dict{String,<:Any}, wdata::Dict{String,<:Any}, ptype::Type, wtype::Type, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
-    # Instantiate the PowerModelsDistribution object.
-    pm = _PMD.instantiate_mc_model(pdata, ptype, m->nothing; ref_extensions=pm_ref_extensions)
-
     # Instantiate the WaterModels object.
-    wm = _WM.instantiate_model(wdata, wtype, m->nothing; ref_extensions=wm_ref_extensions, jump_model=pm.model)
+    wm = _WM.instantiate_model(wdata, wtype, m->nothing; ref_extensions=wm_ref_extensions)
+
+    # Set the bounds of pump loads within the power network data.
+    for (a, pump) in _WM.ref(wm, :pump)
+        i = _get_pump_bus(wm, pdata, a)
+        max_power = inv(pdata["baseMVA"]) * _get_pump_max_power(wm, a) * 1.0e-6
+
+        for (k, load) in _get_loads_from_bus(pdata, i)
+            load["pd"] = inv(3.0) * max_power * ones(length(load["pd"]))
+        end
+    end
+
+    # Instantiate the PowerModelsDistribution object.
+    pm = _PMD.instantiate_mc_model(pdata, ptype, m->nothing; ref_extensions=pm_ref_extensions, jump_model=wm.model)
 
     # Build the corresponding problem.
     build_method(pm, wm)
