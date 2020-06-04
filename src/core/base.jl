@@ -15,6 +15,7 @@ function instantiate_model(pdata::Dict{String,<:Any}, wdata::Dict{String,<:Any},
         max_power = inv(pdata["baseMVA"]) * _get_pump_max_power(wm, a) * 1.0e-6
 
         for (k, load) in _get_loads_from_bus(pdata, i)
+            # TODO: Add an warning flag here if changing pd.
             load["pd"] = inv(3.0) * max_power * ones(length(load["pd"]))
         end
     end

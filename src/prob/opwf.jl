@@ -23,7 +23,7 @@ function build_opwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel; kwar
         end
     end
 
-    # TODO: Add a constraint that minimizes total energy.
+    # TODO: Add an objective that minimizes total energy.
     JuMP.@objective(pm.model, _MOI.FEASIBILITY_SENSE, 0.0)
 end
 
@@ -40,6 +40,6 @@ function build_mn_opwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel; k
     # Power-only related variables and constraints
     _PMD.build_mc_mld(pm)
 
-    # TODO: Add a constraint that minimizes total energy.
+    # TODO: Add an objective that minimizes total energy.
     JuMP.@objective(pm.model, _MOI.FEASIBILITY_SENSE, 0.0)
 end
