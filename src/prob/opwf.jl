@@ -18,7 +18,7 @@ function build_opwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel; kwar
         if "pump_id" in keys(load)
             constraint_pump_load(pm, wm, i, load["pump_id"])
         else
-            constraint_fixed_load(pm, wm, i)
+            constraint_fixed_load(pm, i)
         end
     end
 
@@ -44,7 +44,7 @@ function build_mn_opwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel; k
         if "pump_id" in keys(load)
             constraint_pump_load(pm, wm, i, load["pump_id"])
         else
-            constraint_fixed_load(pm, wm, i)
+            constraint_fixed_load(pm, i)
         end
     end
 

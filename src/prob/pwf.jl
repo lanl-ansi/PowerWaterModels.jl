@@ -18,7 +18,7 @@ function build_pwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel)
         if "pump_id" in keys(load)
             constraint_pump_load(pm, wm, i, load["pump_id"])
         else
-            constraint_fixed_load(pm, wm, i)
+            constraint_fixed_load(pm, i)
         end
     end
 
@@ -38,6 +38,17 @@ function build_mn_pwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel)
 
     # Water-only related variables and constraints.
     _WM.build_mn_wf(wm)
+
+    ## Add constraints related to pump and non-pump loads.
+    #for (nw, network) in _WM.nws(wm)
+    #    for (i, load) in _PMD.ref(pm, nw, :load)
+    #        if "pump_id" in keys(load)
+    #            constraint_pump_load(pm, wm, i, load["pump_id"], pnw=nw, wnw=nw)
+    #        else
+    #            constraint_fixed_load(pm, wm, i, pnw=nw)
+    #        end
+    #    end
+    #end
 
     # Add a feasibility-only objective.
     JuMP.@objective(pm.model, _MOI.FEASIBILITY_SENSE, 0.0)
