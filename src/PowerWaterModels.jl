@@ -34,6 +34,8 @@ module PowerWaterModels
         Memento.config!(Memento.getlogger("PowerWaterModels"), level)
     end
 
+    include("io/common.jl")
+
     include("core/base.jl")
     include("core/data.jl")
     include("core/ref.jl")

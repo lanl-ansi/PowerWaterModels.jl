@@ -1,23 +1,3 @@
-function _get_pump_from_load(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel, i::Int64)
-    load_source_id = _PM.ref(pm, :load, i)["source_id"][2]
-    mapping = filter(x -> load_source_id in x.second["bus_id"], pm.data["pump_mapping"])
-
-    if length(mapping) <= 0
-        return nothing
-    else
-        pump_name = string(mapping["1"]["pump_id"][1])
-        return findfirst(x -> x["source_id"][2] == pump_name, _WM.ref(wm, :pump))
-    end
-end
-
-function _get_pump_bus(wm::_WM.AbstractWaterModel, pdata::Dict{String,<:Any}, a::Int64)
-    pump_name = parse(Int64, _WM.ref(wm, :pump, a)["source_id"][2])
-    pump_mapping = filter(x -> pump_name in x.second["pump_id"], pdata["pump_mapping"])
-    vals = collect(values(pump_mapping))[1]
-    @assert all(y->y == vals["bus_id"][1], vals["bus_id"]) && all(y->y == vals["pump_id"][1], vals["pump_id"])
-    return vals["bus_id"][1]
-end
-
 function _get_pump_max_power(wm::_WM.AbstractWaterModel, a::Int, wnw::Int=wm.cnw)
     rho = 1000.0 # Water density (kilogram per cubic meter).
     gravity = 9.80665 # Gravitational acceleration (meter per second squared).

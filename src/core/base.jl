@@ -1,21 +1,24 @@
 ""
-function instantiate_model(pfile::String, wfile::String, ptype::Type, wtype::Type, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
+function instantiate_model(pfile::String, wfile::String, pwfile::String, ptype::Type, wtype::Type, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
+    pwdata = parse_json(pwfile)
     pdata, wdata = _PMD.parse_file(pfile), _WM.parse_file(wfile)
-    return instantiate_model(pdata, wdata, ptype, wtype, build_method; pm_ref_extensions=pm_ref_extensions, wm_ref_extensions=wm_ref_extensions, kwargs...)
+    return instantiate_model(pdata, wdata, pwdata, ptype, wtype, build_method; pm_ref_extensions=pm_ref_extensions, wm_ref_extensions=wm_ref_extensions, kwargs...)
 end
 
 ""
-function instantiate_model(pdata::Dict{String,<:Any}, wdata::Dict{String,<:Any}, ptype::Type, wtype::Type, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
+function instantiate_model(pdata::Dict{String,<:Any}, wdata::Dict{String,<:Any}, pwdata::Dict{String,<:Any}, ptype::Type, wtype::Type, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
     # Instantiate the WaterModels object.
     wm = _WM.instantiate_model(wdata, wtype, m->nothing; ref_extensions=wm_ref_extensions)
 
-    # Set the bounds of pump loads within the power network data.
-    for (a, pump) in _WM.ref(wm, :pump)
-        i = _get_pump_bus(wm, pdata, a)
+    for link in pwdata["power_water_links"]
+        a = _get_pump_id_from_name(link["pump_id"], wdata)
+        i = _get_bus_id_from_name(link["bus_id"], pdata)
         max_power = inv(pdata["baseMVA"]) * _get_pump_max_power(wm, a) * 1.0e-6
 
         for (k, load) in _get_loads_from_bus(pdata, i)
+            Memento.info(_LOGGER, "Modifying load bounds at bus $(link["bus_id"]).")
             load["pd"] = inv(3.0) * max_power * ones(length(load["pd"]))
+            load["pump_id"] = a
         end
     end
 
@@ -30,9 +33,9 @@ function instantiate_model(pdata::Dict{String,<:Any}, wdata::Dict{String,<:Any},
 end
 
 ""
-function run_model(pdata::Dict{String,<:Any}, wdata::Dict{String,<:Any}, ptype::Type, wtype::Type, optimizer, build_method; pm_solution_processors=[], wm_solution_processors=[], pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
+function run_model(pdata::Dict{String,<:Any}, wdata::Dict{String,<:Any}, pwdata::Dict{String,<:Any}, ptype::Type, wtype::Type, optimizer, build_method; pm_solution_processors=[], wm_solution_processors=[], pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
     start_time = time()
-    pm, wm = instantiate_model(pdata, wdata, ptype, wtype, build_method; pm_ref_extensions=pm_ref_extensions, wm_ref_extensions=wm_ref_extensions, kwargs...)
+    pm, wm = instantiate_model(pdata, wdata, pwdata, ptype, wtype, build_method; pm_ref_extensions=pm_ref_extensions, wm_ref_extensions=wm_ref_extensions, kwargs...)
     Memento.debug(_LOGGER, "pwm model build time: $(time() - start_time)")
 
     start_time = time()
@@ -51,7 +54,8 @@ function run_model(pdata::Dict{String,<:Any}, wdata::Dict{String,<:Any}, ptype::
 end
 
 ""
-function run_model(pfile::String, wfile::String, ptype::Type, wtype::Type, optimizer, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
+function run_model(pfile::String, wfile::String, pwfile::String, ptype::Type, wtype::Type, optimizer, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
+    pwdata = parse_json(pwfile)
     pdata, wdata = _PMD.parse_file(pfile), _WM.parse_file(wfile)
-    return run_model(pdata, wdata, ptype, wtype, optimizer, build_method; pm_ref_extensions=pm_ref_extensions, wm_ref_extensions=wm_ref_extensions, kwargs...)
+    return run_model(pdata, wdata, pwdata, ptype, wtype, optimizer, build_method; pm_ref_extensions=pm_ref_extensions, wm_ref_extensions=wm_ref_extensions, kwargs...)
 end

@@ -9,12 +9,14 @@ function make_three_phase_power_network(data::Dict{String,<:Any})
     return data
 end
 
-function _get_pump_bus(pdata::Dict{String,<:Any}, wdata::Dict{String,<:Any}, a::String)
-    pump_name = parse(Int64, wdata["pump"][a]["source_id"][2])
-    pump_mapping = filter(x -> pump_name in x.second["pump_id"], pdata["pump_mapping"])
-    vals = collect(values(pump_mapping))[1]
-    @assert all(y->y == vals["bus_id"][1], vals["bus_id"]) && all(y->y == vals["pump_id"][1], vals["pump_id"])
-    return vals["bus_id"][1]
+function _get_bus_id_from_name(name::String, pdata::Dict{String,<:Any})
+    name_dict = Dict(i=>bus["index"] for (i, bus) in pdata["bus"])
+    return name_dict[name]
+end
+
+function _get_pump_id_from_name(name::String, wdata::Dict{String,<:Any})
+    name_dict = Dict(a=>pump["index"] for (a, pump) in wdata["pump"])
+    return name_dict[name]
 end
 
 function _get_loads_from_bus(pdata::Dict{String,<:Any}, i::Int64)
