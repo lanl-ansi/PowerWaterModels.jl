@@ -7,8 +7,7 @@ function constraint_pump_load(pm::_PM.AbstractPowerModel, wm::_WM.AbstractUndire
 
     pd = sum(_PM.ref(pm, pnw, :load, i)["pd"])
     z = _PM.var(pm, pnw, :z_demand, i)
-    pump_power = JuMP.@NLexpression(pm.model, coeff * g * q)
-    JuMP.@NLconstraint(pm.model, pump_power == pd * z)
+    JuMP.@constraint(pm.model, coeff * g * q == pd * z)
 end
 
 function constraint_pump_load(pm::_PM.AbstractPowerModel, wm::_WM.AbstractDirectedFlowModel, i::Int, a::Int, pnw::Int=pm.cnw, wnw::Int=wm.cnw)
@@ -20,6 +19,5 @@ function constraint_pump_load(pm::_PM.AbstractPowerModel, wm::_WM.AbstractDirect
 
     pd = sum(_PM.ref(pm, pnw, :load, i)["pd"])
     z = _PM.var(pm, pnw, :z_demand, i)
-    pump_power = JuMP.@NLexpression(pm.model, coeff * g * qp)
-    JuMP.@NLconstraint(pm.model, pump_power == pd * z)
+    JuMP.@constraint(pm.model, coeff * g * q == pd * z)
 end
