@@ -12,6 +12,5 @@
         ptype, wtype = _PMD.DCPPowerModel, _WM.MILPWaterModel
         result = run_opwf(pdata, wdata, pwdata, ptype, wtype, juniper)
         @test result["termination_status"] == _MOI.LOCALLY_SOLVED
-        @test isapprox(result["objective"], 0.0, atol=1.0e-6)
     end      
 end

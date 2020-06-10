@@ -11,9 +11,6 @@ PowerWaterModels.jl is a Julia/JuMP Package for the joint optimization of power 
 * Power-Water Flow (pwf)
 * Optimal Power-Water Flow (opwf)
 
-**Core Network Formulations**
-* MINLP - mixed-integer nonconvex program
-
 ## Development
 Community-driven development and enhancement of PowerWaterModels is welcomed and encouraged.
 Please feel free to fork this repository and share your contributions to the master branch with a pull request.

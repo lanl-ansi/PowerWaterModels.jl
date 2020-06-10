@@ -22,8 +22,8 @@ function build_opwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel; kwar
         end
     end
 
-    # TODO: Add an objective that minimizes total energy.
-    JuMP.@objective(pm.model, _MOI.FEASIBILITY_SENSE, 0.0)
+    # Add an objective that minimizes generator fuel cost.
+    _PM.objective_min_fuel_cost(pm)
 end
 
 "Entry point into running the multinetwork optimal power-water flow problem."
@@ -39,6 +39,15 @@ function build_mn_opwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel; k
     # Power-only related variables and constraints
     _PMD.build_mc_mld(pm)
 
-    # TODO: Add an objective that minimizes total energy.
-    JuMP.@objective(pm.model, _MOI.FEASIBILITY_SENSE, 0.0)
+    # Add constraints related to pump and non-pump loads.
+    for (i, load) in _PMD.ref(pm, :load)
+        if "pump_id" in keys(load)
+            constraint_pump_load(pm, wm, i, load["pump_id"])
+        else
+            constraint_fixed_load(pm, wm, i)
+        end
+    end
+
+    # Add an objective that minimizes generator fuel cost.
+    _PM.objective_min_fuel_cost(pm)
 end
