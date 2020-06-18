@@ -30,6 +30,6 @@ function _get_pump_power_coeff(pm::_PM.AbstractPowerModel, wm::_WM.AbstractUndir
     efficiency = 0.85 # TODO: How can the efficiency curve be used?
     rho = 1000.0 # Water density (kilogram per cubic meter).
     gravity = 9.80665 # Gravitational acceleration (meter per second squared).
-    base_mva = _PM.ref(pm, nw, :baseMVA)
-    coeff = inv(base_mva) * 1.0e-6 * inv(efficiency) * rho * gravity
+    scalar = 1.0e-6 * inv(_PM.ref(pm, nw, :baseMVA)) # Scaling factor for power.
+    coeff = scalar * inv(efficiency) * rho * gravity
 end

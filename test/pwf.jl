@@ -4,9 +4,9 @@
         w_file = "$(wm_path)/test/data/epanet/example_1-sp.inp"
         pw_file = "../test/data/json/case4-example_1.json"
 
-        p_type, w_type = _PMD.DCPPowerModel, _WM.MILPWaterModel
+        p_type, w_type = DCPPowerModel, MILPWaterModel
         result = run_pwf(p_file, w_file, pw_file, p_type, w_type, juniper)
-        @test result["termination_status"] == _MOI.LOCALLY_SOLVED
+        @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0.0, atol=1.0e-6)
     end
 
@@ -15,9 +15,9 @@
         w_file = "$(wm_path)/test/data/epanet/example_1.inp"
         pw_file = "../test/data/json/case4-example_1.json"
 
-        p_type, w_type = _PMD.DCPPowerModel, _WM.MILPWaterModel
+        p_type, w_type = DCPPowerModel, MILPWaterModel
         result = run_pwf(p_file, w_file, pw_file, p_type, w_type, juniper)
-        @test result["termination_status"] == _MOI.LOCALLY_SOLVED
+        @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0.0, atol=1.0e-6)
     end
 end

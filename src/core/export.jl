@@ -10,19 +10,20 @@ const _EXCLUDE_SYMBOLS = [Symbol(@__MODULE__), :eval, :include]
 
 for sym in names(@__MODULE__, all=true)
     sym_string = string(sym)
+
     if sym in _EXCLUDE_SYMBOLS || startswith(sym_string, "_") || startswith(sym_string, "@_")
         continue
     end
+
     if !(Base.isidentifier(sym) || (startswith(sym_string, "@") &&
          Base.isidentifier(sym_string[2:end])))
        continue
     end
-    #println("$(sym)")
+
     @eval export $sym
 end
 
-
-# the follow items are also exported for user-friendlyness when calling
+# the follow items are also exported for user friendliness when calling
 # `using PowerWaterModels`
 
 # so that users do not need to import JuMP to use a solver with PowerWaterModels
@@ -34,18 +35,30 @@ export with_optimizer
 import JuMP: optimizer_with_attributes
 export optimizer_with_attributes
 
-import MathOptInterface: TerminationStatusCode
+import InfrastructureModels._MOI: TerminationStatusCode
 export TerminationStatusCode
 
-import MathOptInterface: ResultStatusCode
+import InfrastructureModels._MOI: ResultStatusCode
 export ResultStatusCode
 
 for status_code_enum in [TerminationStatusCode, ResultStatusCode]
     for status_code in instances(status_code_enum)
-        @eval import MathOptInterface: $(Symbol(status_code))
+        @eval import InfrastructureModels._MOI: $(Symbol(status_code))
         @eval export $(Symbol(status_code))
     end
 end
 
-# from InfrastructureModels
+# Export PowerModels modeling types for ease of use.
+power_models = filter(x -> endswith(string(x), "PowerModel") &&
+    !occursin("Abstract", string(x)), names(PowerModelsDistribution))
+for x in power_models @eval import PowerModelsDistribution: $(x) end
+for x in power_models @eval export $(x) end
+
+# Export WaterModels modeling types for ease of use.
+water_models = filter(x -> endswith(string(x), "WaterModel") &&
+    !occursin("Abstract", string(x)), names(WaterModels))
+for x in water_models @eval import WaterModels: $(x) end
+for x in water_models @eval export $(x) end
+
+# Export from InfrastructureModels.
 export ids, ref, var, con, sol, nw_ids, nws, optimize_model!
