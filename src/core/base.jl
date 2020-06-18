@@ -1,29 +1,26 @@
 ""
-function instantiate_model(pfile::String, wfile::String, pwfile::String, ptype::Type, wtype::Type, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
-    pwdata = parse_json(pwfile)
-    pdata, wdata = _PMD.parse_file(pfile), _WM.parse_file(wfile)
-    return instantiate_model(pdata, wdata, pwdata, ptype, wtype, build_method; pm_ref_extensions=pm_ref_extensions, wm_ref_extensions=wm_ref_extensions, kwargs...)
+function instantiate_model(p_file::String, w_file::String, pw_file::String, p_type::Type, w_type::Type, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
+    # Read power, water, and linkage data from files.
+    p_data, w_data, pw_data = _read_networks(p_file, w_file, pw_file)
+
+    # Instantiate the PowerWaterModels object.
+    return instantiate_model(p_data, w_data, pw_data, p_type, w_type,
+        build_method; pm_ref_extensions=pm_ref_extensions,
+        wm_ref_extensions=wm_ref_extensions, kwargs...)
 end
 
 ""
-function instantiate_model(pdata::Dict{String,<:Any}, wdata::Dict{String,<:Any}, pwdata::Dict{String,<:Any}, ptype::Type, wtype::Type, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
+function instantiate_model(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_data::Dict{String,<:Any}, p_type::Type, w_type::Type, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
     # Instantiate the WaterModels object.
-    wm = _WM.instantiate_model(wdata, wtype, m->nothing; ref_extensions=wm_ref_extensions)
+    wm = _WM.instantiate_model(w_data, w_type, m->nothing;
+        ref_extensions=wm_ref_extensions)
 
-    for link in pwdata["power_water_links"]
-        a = _get_pump_id_from_name(link["pump_id"], wdata)
-        i = _get_bus_id_from_name(link["bus_id"], pdata)
-        max_power = inv(pdata["baseMVA"]) * _get_pump_max_power(wm, a) * 1.0e-6
-
-        for (k, load) in _get_loads_from_bus(pdata, i)
-            Memento.info(_LOGGER, "Modifying load bounds at bus $(link["bus_id"]).")
-            load["pd"] = inv(3.0) * max_power * ones(length(load["pd"]))
-            load["pump_id"] = a
-        end
-    end
+    # Change the loads associated with pumps.
+    p_data = _modify_pump_loads(p_data, pw_data, wm)
 
     # Instantiate the PowerModelsDistribution object.
-    pm = _PMD.instantiate_mc_model(pdata, ptype, m->nothing; ref_extensions=pm_ref_extensions, jump_model=wm.model)
+    pm = _PMD.instantiate_mc_model(p_data, p_type, m->nothing;
+        ref_extensions=pm_ref_extensions, jump_model=wm.model)
 
     # Build the corresponding problem.
     build_method(pm, wm)
@@ -33,9 +30,13 @@ function instantiate_model(pdata::Dict{String,<:Any}, wdata::Dict{String,<:Any},
 end
 
 ""
-function run_model(pdata::Dict{String,<:Any}, wdata::Dict{String,<:Any}, pwdata::Dict{String,<:Any}, ptype::Type, wtype::Type, optimizer, build_method; pm_solution_processors=[], wm_solution_processors=[], pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
+function run_model(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_data::Dict{String,<:Any}, p_type::Type, w_type::Type, optimizer, build_method; pm_solution_processors=[], wm_solution_processors=[], pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
     start_time = time()
-    pm, wm = instantiate_model(pdata, wdata, pwdata, ptype, wtype, build_method; pm_ref_extensions=pm_ref_extensions, wm_ref_extensions=wm_ref_extensions, kwargs...)
+
+    pm, wm = instantiate_model(p_data, w_data, pw_data, p_type, w_type,
+        build_method; pm_ref_extensions=pm_ref_extensions,
+        wm_ref_extensions=wm_ref_extensions, kwargs...)
+
     Memento.debug(_LOGGER, "pwm model build time: $(time() - start_time)")
 
     start_time = time()
@@ -47,15 +48,19 @@ function run_model(pdata::Dict{String,<:Any}, wdata::Dict{String,<:Any}, pwdata:
     result = power_result # Contains most of the result data, already.
 
     # TODO: There could possibly be component name clashes, here, later on.
-    result["solution"] = merge(power_result["solution"], water_result["solution"])
+    _IM.update_data!(result["solution"], water_result["solution"])
 
     # Return the combined result dictionary.
     return result
 end
 
 ""
-function run_model(pfile::String, wfile::String, pwfile::String, ptype::Type, wtype::Type, optimizer, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
-    pwdata = parse_json(pwfile)
-    pdata, wdata = _PMD.parse_file(pfile), _WM.parse_file(wfile)
-    return run_model(pdata, wdata, pwdata, ptype, wtype, optimizer, build_method; pm_ref_extensions=pm_ref_extensions, wm_ref_extensions=wm_ref_extensions, kwargs...)
+function run_model(p_file::String, w_file::String, pw_file::String, p_type::Type, w_type::Type, optimizer, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
+    # Read power, water, and linkage data from files.
+    p_data, w_data, pw_data = _read_networks(p_file, w_file, pw_file)
+
+    # Instantiate the PowerWaterModels modeling object.
+    return run_model(p_data, w_data, pw_data, p_type, w_type, optimizer,
+        build_method; pm_ref_extensions=pm_ref_extensions,
+        wm_ref_extensions=wm_ref_extensions, kwargs...)
 end

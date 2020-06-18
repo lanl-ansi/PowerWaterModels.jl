@@ -1,7 +1,7 @@
-function _get_pump_max_power(wm::_WM.AbstractWaterModel, a::Int, wnw::Int=wm.cnw)
+function _get_pump_max_power(wm::_WM.AbstractWaterModel, a::Int; nw::Int=wm.cnw)
     rho = 1000.0 # Water density (kilogram per cubic meter).
     gravity = 9.80665 # Gravitational acceleration (meter per second squared).
-    pump = _WM.ref(wm, wnw, :pump, a)
+    pump = _WM.ref(wm, nw, :pump, a)
 
     # Get the minimum efficiency used in describing the pump.
     if haskey(pump, "efficiency_curve")

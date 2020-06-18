@@ -1,8 +1,14 @@
 {
     "power_water_links": [
         {
-            "bus_id": "4",
-            "pump_id": "9"
+            "load_source_id": "4",
+            "pump_source_id": "9"
         }
-    ]
+    ],
+    "power_metadata": {
+        "source_type": "matpower"
+    },
+    "water_metadata": {
+        "source_type": "epanet"
+    }
 }

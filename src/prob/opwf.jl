@@ -6,48 +6,24 @@ function run_opwf(pfile, wfile, pwfile, ptype, wtype, optimizer; kwargs...)
 end
 
 "Construct the optimal power-water flow problem."
-function build_opwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel; kwargs...)
-    # Power-only related variables and constraints
-    _PMD.build_mc_mld(pm)
+function build_opwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel)
+    # Power-only related variables and constraints.
+    _PMD.build_mn_mc_mld(pm)
 
-    # Water-only related variables and constraints
-    _WM.build_wf(wm)
+    # Water-only related variables and constraints.
+    _WM.build_mn_wf(wm)
 
-    # Add constraints related to pump and non-pump loads.
-    for (i, load) in _PMD.ref(pm, :load)
-        if "pump_id" in keys(load)
-            constraint_pump_load(pm, wm, i, load["pump_id"])
-        else
-            constraint_fixed_load(pm, i)
+    # Add constraints related to loads.
+    for (nw, network) in _WM.nws(wm)
+        for (i, load) in _PMD.ref(pm, nw, :load)
+            if "pump_id" in keys(load)
+                constraint_pump_load(pm, wm, i, load["pump_id"], nw=nw)
+            else
+                constraint_fixed_load(pm, i, nw=nw)
+            end
         end
     end
 
-    # Add an objective that minimizes generator fuel cost.
-    _PM.objective_min_fuel_cost(pm)
-end
-
-"Entry point into running the multinetwork optimal power-water flow problem."
-function run_mn_opwf(pfile, wfile, pwfile, ptype, wtype, optimizer; kwargs...)
-    return run_model(pfile, wfile, pwfile, ptype, wtype, optimizer, build_opwf; kwargs...)
-end
-
-"Construct the multinetwork optimal power-water flow problem."
-function build_mn_opwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel; kwargs...)
-    # Water-only related variables and constraints
-    _WM.build_mn_owf(wm)
-
-    # Power-only related variables and constraints
-    _PMD.build_mc_mld(pm)
-
-    # Add constraints related to pump and non-pump loads.
-    for (i, load) in _PMD.ref(pm, :load)
-        if "pump_id" in keys(load)
-            constraint_pump_load(pm, wm, i, load["pump_id"])
-        else
-            constraint_fixed_load(pm, i)
-        end
-    end
-
-    # Add an objective that minimizes generator fuel cost.
+    # Add a feasibility-only objective.
     _PM.objective_min_fuel_cost(pm)
 end
