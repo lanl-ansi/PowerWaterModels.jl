@@ -32,8 +32,10 @@ wm_path = joinpath(dirname(pathof(_WM)), "..")
 
 @testset "PowerWaterModels" begin
 
-    include("pwf.jl")
+    include("io.jl")
 
-    include("opwf.jl")
+    #include("pwf.jl")
+
+    #include("opwf.jl")
 
 end

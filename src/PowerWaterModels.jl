@@ -2,17 +2,15 @@ module PowerWaterModels
     import JSON
     import JuMP
     import Memento
-    import InfrastructureModels
-    import MathOptInterface
-    import PowerModels
     import PowerModelsDistribution
     import WaterModels
 
-    const _MOI = MathOptInterface
-    const _IM = InfrastructureModels
-    const _PM = PowerModels
     const _PMD = PowerModelsDistribution
     const _WM = WaterModels
+
+    const _IM = _PMD._IM # InfrastructureModels
+    const _PM = _PMD._PM # PowerModels
+    const _MOI = _IM._MOI # MathOptInterface
 
     # Create our module level logger (this will get precompiled)
     const _LOGGER = Memento.getlogger(@__MODULE__)

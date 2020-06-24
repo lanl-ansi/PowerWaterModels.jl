@@ -1,0 +1,14 @@
+{
+    "power_water_links": [
+        {
+            "load_source_id": "L3",
+            "pump_source_id": "9"
+        }
+    ],
+    "power_metadata": {
+        "source_type": "opendss"
+    },
+    "water_metadata": {
+        "source_type": "epanet"
+    }
+}

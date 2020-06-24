@@ -1,6 +1,9 @@
 function make_consistent_networks(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any})
-    num_steps_p = _IM.get_num_steps(p_data)
-    num_steps_w = _IM.get_num_steps(w_data)
+    num_steps_p = _IM.get_num_networks(p_data)
+    num_steps_w = _IM.get_num_networks(w_data)
+
+    # TODO: Should check if something is a multinetwork before doing the below.
+    #if # TODO: Is either a multinetwork?
 
     if num_steps_p == num_steps_w && num_steps_p == 1
         p_data_tmp = _IM.replicate(p_data, 1, _PM._pm_global_keys)
@@ -49,26 +52,6 @@ function _modify_pump_loads(p_data::Dict{String,<:Any}, pw_data::Dict{String,<:A
     end
 
     return p_data
-end
-
-function _read_networks(p_file::String, w_file::String, pw_file::String)
-    # Read power distribution network data.
-    if split(p_file, ".")[end] == "m" # If reading a MATPOWER file.
-        p_data = _PM.parse_file(p_file)
-        _scale_loads!(p_data, inv(3.0))
-        _PMD.make_multiconductor!(p_data, real(3))
-    else # Otherwise, use the PowerModelsDistribution parser.
-        p_data = _PMD.parse_file(p_file)
-    end
-
-    w_data = _WM.parse_file(w_file) # Water distribution network data.
-    pw_data = parse_json(pw_file) # Power-water network linkage data.
-
-    # Create new network data, ensuring network sizes match.
-    p_data, w_data = make_consistent_networks(p_data, w_data)
-
-    # Return three data dictionaries.
-    return p_data, w_data, pw_data
 end
 
 function _scale_loads!(p_data::Dict{String,<:Any}, scalar::Float64)
