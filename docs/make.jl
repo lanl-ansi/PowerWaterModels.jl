@@ -6,9 +6,9 @@ makedocs(
     sitename = "PowerWaterModels",
     authors = "Byron Tasseff and contributors",
     pages = [
-        "Home" => "index.md"
+        "Home" => "index.md",
         "Manual" => [
-            "Getting Started" => "quickguide.md"
+            "Getting Started" => "quickguide.md",
             "Network Data Format" => "network-data.md",
             "Result Data Format" => "result-data.md",
             "Mathematical Models" => "math-model.md"
