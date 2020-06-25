@@ -38,5 +38,11 @@ Installation of the JuMP interface to Juniper can be performed via the Julia pac
 ```julia
 using Juniper, Ipopt, Cbc
 using PowerWaterModels
+
+wm_path = joinpath(dirname(pathof(PowerWaterModels._WM)), "..")
+p_file = "test/data/matpower/case4.m"
+w_file = "$(wm_path)/test/data/epanet/example_1.inp"
+pw_file = "test/data/json/case4-example_1.json"
+
 result = run_pwf("shamir.inp", MILPWaterModel, Cbc.Optimizer, ext=ext)
 ```

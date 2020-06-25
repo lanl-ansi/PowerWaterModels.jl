@@ -1,25 +1,25 @@
 ""
-function instantiate_model(p_file::String, w_file::String, pw_file::String, p_type::Type, w_type::Type, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
+function instantiate_model(p_file::String, w_file::String, pw_file::String, p_type::Type, w_type::Type, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], wm_ext=Dict{Symbol,Any}(), kwargs...)
     # Read power, water, and linkage data from files.
     p_data, w_data, pw_data = parse_files(p_file, w_file, pw_file)
 
     # Instantiate the PowerWaterModels object.
     return instantiate_model(p_data, w_data, pw_data, p_type, w_type,
         build_method; pm_ref_extensions=pm_ref_extensions,
-        wm_ref_extensions=wm_ref_extensions, kwargs...)
+        wm_ref_extensions=wm_ref_extensions, wm_ext=wm_ext, kwargs...)
 end
 
 ""
-function instantiate_model(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_data::Dict{String,<:Any}, p_type::Type, w_type::Type, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
+function instantiate_model(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_data::Dict{String,<:Any}, p_type::Type, w_type::Type, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], wm_ext=Dict{Symbol,Any}(), kwargs...)
     # TODO: Add multinetwork data checks, here. Throw error if both not multinetwork.
     # TODO: Move this up to the top. Change the loads associated with pumps.
     #p_data = _modify_pump_loads(p_data, w_data, pw_data)
 
     # Instantiate the WaterModels object.
     wm = _WM.instantiate_model(w_data, w_type, m->nothing;
-        ref_extensions=wm_ref_extensions)
+        ref_extensions=wm_ref_extensions, ext=wm_ext)
 
-    p_data = _modify_pump_loads(p_data, pw_data, wm)
+    #p_data = _modify_loads(p_data, pw_data, wm)
 
     # Instantiate the PowerModelsDistribution object.
     pm = _PMD.instantiate_mc_model(p_data, p_type, m->nothing;
@@ -33,12 +33,12 @@ function instantiate_model(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any
 end
 
 ""
-function run_model(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_data::Dict{String,<:Any}, p_type::Type, w_type::Type, optimizer, build_method; pm_solution_processors=[], wm_solution_processors=[], pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
+function run_model(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_data::Dict{String,<:Any}, p_type::Type, w_type::Type, optimizer, build_method; pm_solution_processors=[], wm_solution_processors=[], pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], wm_ext=Dict{Symbol,Any}(), kwargs...)
     start_time = time()
 
     pm, wm = instantiate_model(p_data, w_data, pw_data, p_type, w_type,
         build_method; pm_ref_extensions=pm_ref_extensions,
-        wm_ref_extensions=wm_ref_extensions, kwargs...)
+        wm_ref_extensions=wm_ref_extensions, wm_ext=wm_ext, kwargs...)
 
     Memento.debug(_LOGGER, "pwm model build time: $(time() - start_time)")
 
@@ -58,12 +58,12 @@ function run_model(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_da
 end
 
 ""
-function run_model(p_file::String, w_file::String, pw_file::String, p_type::Type, w_type::Type, optimizer, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], kwargs...)
+function run_model(p_file::String, w_file::String, pw_file::String, p_type::Type, w_type::Type, optimizer, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], wm_ext=Dict{Symbol,Any}(), kwargs...)
     # Read power, water, and linkage data from files.
     p_data, w_data, pw_data = parse_files(p_file, w_file, pw_file)
 
     # Instantiate the PowerWaterModels modeling object.
     return run_model(p_data, w_data, pw_data, p_type, w_type, optimizer,
         build_method; pm_ref_extensions=pm_ref_extensions,
-        wm_ref_extensions=wm_ref_extensions, kwargs...)
+        wm_ref_extensions=wm_ref_extensions, wm_ext=wm_ext, kwargs...)
 end

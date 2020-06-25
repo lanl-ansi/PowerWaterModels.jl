@@ -21,10 +21,12 @@ module PowerWaterModels
 
     "Suppresses information and warning messages output. For fine-grained control use the Memento package."
     function silence()
-        Memento.info(_LOGGER, "Suppressing information and warning messages for the rest of this session. Use the Memento package for more fine-grained control of logging.")
-        Memento.setlevel!(Memento.getlogger(InfrastructureModels), "error")
-        Memento.setlevel!(Memento.getlogger(WaterModels), "error")
-        Memento.setlevel!(Memento.getlogger(PowerModelsDistribution), "error")
+        Memento.info(_LOGGER, "Suppressing information and warning messages for "
+            * "the rest of this session. Use the Memento package for more "
+            * "fine-grained control of logging.")
+        Memento.setlevel!(Memento.getlogger(_IM), "error")
+        Memento.setlevel!(Memento.getlogger(_WM), "error")
+        Memento.setlevel!(Memento.getlogger(_PMD), "error")
     end
 
     "Allows the user to set the logging level without the need to add Memento."

@@ -11,28 +11,30 @@ function parse_json(path::String)
 end
 
 """
-    parse_files(p_path, w_path, pw_path)
+    parse_files(p_file, w_file, pw_file)
 
 Parses power, water, and power-water linking input files and returns three data
 dictionaries for power, water, and power-water linking data, respectively.
 """
-function parse_files(p_path::String, w_path::String, pw_path::String)
+function parse_files(p_file::String, w_file::String, pw_file::String)
     # Read power distribution network data.
-    if split(p_path, ".")[end] == "m" # If reading a MATPOWER file.
-        p_data = _PM.parse_file(p_path)
+    if split(p_file, ".")[end] == "m" # If reading a MATPOWER file.
+        p_data = _PM.parse_file(p_file)
         _scale_loads!(p_data, inv(3.0))
         _PMD.make_multiconductor!(p_data, real(3))
     else # Otherwise, use the PowerModelsDistribution parser.
-        p_data = _PMD.parse_file(p_path)
+        p_data = _PMD.parse_file(p_file)
     end
 
-    w_data = _WM.parse_file(w_path) # Water distribution network data.
-    pw_data = parse_json(pw_path) # Power-water network linkage data.
+    # Parse water and power-water linkage data.
+    w_data = _WM.parse_file(w_file) # Water distribution network data.
+    pw_data = parse_json(pw_file) # Power-water network linkage data.
 
-    # Create new network data, ensuring network sizes match.
+    # Create new network data, where network sizes match.
     p_data, w_data = make_consistent_networks(p_data, w_data)
 
-    # TODO: Add data consistency checks, here.
+    # Ensure network consistency, here.
+    @assert networks_are_consistent(p_data, w_data)
 
     # Return three data dictionaries.
     return p_data, w_data, pw_data

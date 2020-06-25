@@ -1,23 +1,25 @@
 @testset "Optimal Power-Water Flow Problems" begin
-    @testset "4-bus DCPPowerModel and MILPWaterModel" begin
-        p_file = "../test/data/matpower/case4.m"
-        w_file = "$(wm_path)/test/data/epanet/example_1-sp.inp"
-        pw_file = "../test/data/json/case4-example_1.json"
+    @testset "3-bus LinDist3FlowPowerModel and MILPWaterModel" begin
+        p_file = "$(pm_path)/test/data/matpower/case3.m"
+        w_file = "$(wm_path)/test/data/epanet/snapshot/pump-hw-lps.inp"
+        pw_file = "../test/data/json/case3-pump.json"
 
-        p_type, w_type = DCPPowerModel, MILPWaterModel
-        result = run_opwf(p_file, w_file, pw_file, p_type, w_type, juniper)
+        p_type, w_type = LinDist3FlowPowerModel, MILPWaterModel
+        w_ext = Dict{Symbol,Any}(:pump_breakpoints=>3)
+        result = run_opwf(p_file, w_file, pw_file, p_type, w_type, juniper, w_ext=w_ext)
         @test result["termination_status"] == LOCALLY_SOLVED
-        @test isapprox(result["objective"], 1000.0, rtol=1.0e-4)
+        @test isapprox(result["objective"], 5638.97, atol=1.0e-2)
     end
 
-    @testset "4-bus DCPPowerModel and MILPWaterModel (Multistep)" begin
-        p_file = "../test/data/matpower/case4.m"
-        w_file = "$(wm_path)/test/data/epanet/example_1.inp"
-        pw_file = "../test/data/json/case4-example_1.json"
+    @testset "3-bus LinDist3FlowPowerModel and MILPWaterModel (Multistep)" begin
+        p_file = "$(pm_path)/test/data/matpower/case3.m"
+        w_file = "$(wm_path)/test/data/epanet/multinetwork/pump-hw-lps.inp"
+        pw_file = "../test/data/json/case3-pump.json"
 
-        p_type, w_type = DCPPowerModel, MILPWaterModel
-        result = run_opwf(p_file, w_file, pw_file, p_type, w_type, juniper)
+        p_type, w_type = LinDist3FlowPowerModel, MILPWaterModel
+        w_ext = Dict{Symbol,Any}(:pump_breakpoints=>3)
+        result = run_opwf(p_file, w_file, pw_file, p_type, w_type, juniper, w_ext=w_ext)
         @test result["termination_status"] == LOCALLY_SOLVED
-        @test isapprox(result["objective"], 4000.0, rtol=1.0e-4)
+        @test isapprox(result["objective"], 16916.90, rtol=1.0e-2)
     end
 end

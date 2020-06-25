@@ -27,12 +27,15 @@ cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, "logLevel"=>0)
 juniper = JuMP.optimizer_with_attributes(Juniper.Optimizer, "nl_solver"=>ipopt, "mip_solver"=>cbc, "log_levels"=>[])
 
 # Setup common test data paths (from dependencies).
-pm_path = joinpath(dirname(pathof(_PMD)), "..")
+pm_path = joinpath(dirname(pathof(_PM)), "..")
+pmd_path = joinpath(dirname(pathof(_PMD)), "..")
 wm_path = joinpath(dirname(pathof(_WM)), "..")
 
 @testset "PowerWaterModels" begin
 
     include("io.jl")
+
+    include("data.jl")
 
     #include("pwf.jl")
 
