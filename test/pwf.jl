@@ -6,7 +6,7 @@
 
         p_type, w_type = LinDist3FlowPowerModel, MILPWaterModel
         w_ext = Dict{Symbol,Any}(:pump_breakpoints=>3)
-        result = run_pwf(p_file, w_file, pw_file, p_type, w_type, juniper, w_ext=w_ext)
+        result = run_pwf(p_file, w_file, pw_file, p_type, w_type, juniper; w_ext=w_ext)
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0.0, atol=1.0e-6)
     end
@@ -18,7 +18,7 @@
 
         p_type, w_type = LinDist3FlowPowerModel, MILPWaterModel
         w_ext = Dict{Symbol,Any}(:pump_breakpoints=>3)
-        result = run_pwf(p_file, w_file, pw_file, p_type, w_type, juniper, w_ext=w_ext)
+        result = run_pwf(p_file, w_file, pw_file, p_type, w_type, juniper; w_ext=w_ext)
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0.0, atol=1.0e-6)
     end

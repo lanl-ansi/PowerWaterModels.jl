@@ -9,17 +9,18 @@ function instantiate_model(p_file::String, w_file::String, pw_file::String, p_ty
         wm_ref_extensions=wm_ref_extensions, wm_ext=wm_ext, kwargs...)
 end
 
+
 ""
 function instantiate_model(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_data::Dict{String,<:Any}, p_type::Type, w_type::Type, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], wm_ext=Dict{Symbol,Any}(), kwargs...)
-    # TODO: Add multinetwork data checks, here. Throw error if both not multinetwork.
-    # TODO: Move this up to the top. Change the loads associated with pumps.
-    #p_data = _modify_pump_loads(p_data, w_data, pw_data)
+    # Ensure network consistency, here.
+    @assert networks_are_consistent(p_data, w_data)
+
+    # Modify the loads associated with pumps.
+    _modify_loads!(p_data, w_data, pw_data)
 
     # Instantiate the WaterModels object.
     wm = _WM.instantiate_model(w_data, w_type, m->nothing;
         ref_extensions=wm_ref_extensions, ext=wm_ext)
-
-    #p_data = _modify_loads(p_data, pw_data, wm)
 
     # Instantiate the PowerModelsDistribution object.
     pm = _PMD.instantiate_mc_model(p_data, p_type, m->nothing;
@@ -32,14 +33,13 @@ function instantiate_model(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any
     return pm, wm
 end
 
+
 ""
 function run_model(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_data::Dict{String,<:Any}, p_type::Type, w_type::Type, optimizer, build_method; pm_solution_processors=[], wm_solution_processors=[], pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], wm_ext=Dict{Symbol,Any}(), kwargs...)
     start_time = time()
-
     pm, wm = instantiate_model(p_data, w_data, pw_data, p_type, w_type,
         build_method; pm_ref_extensions=pm_ref_extensions,
         wm_ref_extensions=wm_ref_extensions, wm_ext=wm_ext, kwargs...)
-
     Memento.debug(_LOGGER, "pwm model build time: $(time() - start_time)")
 
     start_time = time()
@@ -48,14 +48,15 @@ function run_model(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_da
     Memento.debug(_LOGGER, "pwm model solution time: $(time() - start_time)")
 
     # Create a combined water-power result object.
-    result = power_result # Contains most of the result data, already.
+    result = power_result # Contains most of the result data.
 
-    # TODO: There could possibly be component name clashes, here, later on.
+    # FIXME: There could possibly be component name clashes, here.
     _IM.update_data!(result["solution"], water_result["solution"])
 
     # Return the combined result dictionary.
     return result
 end
+
 
 ""
 function run_model(p_file::String, w_file::String, pw_file::String, p_type::Type, w_type::Type, optimizer, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], wm_ext=Dict{Symbol,Any}(), kwargs...)

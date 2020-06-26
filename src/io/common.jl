@@ -10,6 +10,7 @@ function parse_json(path::String)
     return dict
 end
 
+
 """
     parse_files(p_file, w_file, pw_file)
 
@@ -32,9 +33,6 @@ function parse_files(p_file::String, w_file::String, pw_file::String)
 
     # Create new network data, where network sizes match.
     p_data, w_data = make_consistent_networks(p_data, w_data)
-
-    # Ensure network consistency, here.
-    @assert networks_are_consistent(p_data, w_data)
 
     # Return three data dictionaries.
     return p_data, w_data, pw_data

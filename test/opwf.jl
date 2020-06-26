@@ -8,7 +8,7 @@
         w_ext = Dict{Symbol,Any}(:pump_breakpoints=>3)
         result = run_opwf(p_file, w_file, pw_file, p_type, w_type, juniper, w_ext=w_ext)
         @test result["termination_status"] == LOCALLY_SOLVED
-        @test isapprox(result["objective"], 5638.97, atol=1.0e-2)
+        @test isapprox(result["objective"], 2932.00, atol=1.0e-2)
     end
 
     @testset "3-bus LinDist3FlowPowerModel and MILPWaterModel (Multistep)" begin
@@ -20,6 +20,6 @@
         w_ext = Dict{Symbol,Any}(:pump_breakpoints=>3)
         result = run_opwf(p_file, w_file, pw_file, p_type, w_type, juniper, w_ext=w_ext)
         @test result["termination_status"] == LOCALLY_SOLVED
-        @test isapprox(result["objective"], 16916.90, rtol=1.0e-2)
+        @test isapprox(result["objective"], 8794.26, rtol=1.0e-2)
     end
 end

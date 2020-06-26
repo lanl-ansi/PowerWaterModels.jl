@@ -1,7 +1,7 @@
 {
     "power_water_links": [
         {
-            "load_source_id": "L1",
+            "load_source_id": "Load.L1",
             "pump_source_id": "1"
         }
     ],
