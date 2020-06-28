@@ -2,7 +2,7 @@ using Documenter, PowerWaterModels
 
 makedocs(
     modules = [PowerWaterModels],
-    format = Documenter.HTML(analytics="UA-367975-10", mathengine=Documenter.MathJax()),
+    format = Documenter.HTML(analytics="UA-367975-10", mathengine=Documenter.MathJax(), prettyurls=false),
     sitename = "PowerWaterModels",
     authors = "Byron Tasseff and contributors",
     pages = [
@@ -17,7 +17,8 @@ makedocs(
             "Network Formulations" => "formulations.md",
             "Problem Specifications" => "specifications.md",
             "Modeling Components" => [
-                "WaterModel" => "model.md",
+                "Power Model" => "power-model.md",
+                "Water Model" => "water-model.md",
                 "Objective" => "objective.md",
                 "Variables" => "variables.md",
                 "Constraints" => "constraints.md"
@@ -26,7 +27,7 @@ makedocs(
             "File I/O" => "parser.md"
         ],
         "Developer" => "developer.md",
-        "Experiment Results" => "experiment-results.md"
+        "Benchmarks" => "benchmarks.md"
     ]
 )
 

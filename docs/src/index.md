@@ -37,7 +37,7 @@ Installation of the JuMP interfaces to Juniper, Ipopt, and Cbc can be performed 
 ] add JuMP Juniper Ipopt Cbc
 ```
 
-After installation of the required solvers, an example optimal power-water flow problem (whose inputs can be found in the `examples` directory within the [PowerWaterModels repository](https://github.com/lanl-ansi/PowerWaterModels.jl) can be solved via
+After installation of the required solvers, an example optimal power-water flow problem (whose file inputs can be found in the `examples` directory within the [PowerWaterModels repository](https://github.com/lanl-ansi/PowerWaterModels.jl) can be solved via
 
 ```julia
 using JuMP, Juniper, Ipopt, Cbc
@@ -53,7 +53,7 @@ p_file = "examples/data/opendss/IEEE13_CDPSM.dss" # Power network.
 w_file = "examples/data/epanet/cohen-short.inp" # Water network.
 pw_file = "examples/data/json/zamzam.json" # Power-water linking.
 
-# Specify the power and water problem formulations separately.
+# Specify the power and water formulation types separately.
 p_type, w_type = LinDist3FlowPowerModel, MILPRWaterModel
 
 # Specify the number of breakpoints used in the linearized water formulation.

@@ -12,7 +12,7 @@ function build_opwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel)
     _PMD.build_mn_mc_mld_simple(pm)
 
     # Water-only related variables and constraints.
-    _WM.build_mn_wf(wm)
+    _WM.build_mn_owf(wm)
 
     for (nw, network) in _PMD.nws(pm)
         # Get all loads defined in the power network.
