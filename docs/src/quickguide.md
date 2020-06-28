@@ -39,7 +39,7 @@ Assuming Gurobi has already been configured on your system, its Julia interface 
 ```
 
 ## Solving an Optimal Power-Water Flow Problem
-After installation of the required solvers, an example optimal power-water flow problem (whose file inputs can be found in the `examples` directory within the [PowerWaterModels repository](https://github.com/lanl-ansi/PowerWaterModels.jl) can be solved via
+After installation of the required solvers, an example optimal power-water flow problem (whose file inputs can be found in the `examples` directory within the [PowerWaterModels repository](https://github.com/lanl-ansi/PowerWaterModels.jl)) can be solved via
 
 ```julia
 using JuMP, Juniper, Ipopt, Cbc
@@ -64,8 +64,6 @@ wm_ext = Dict{Symbol,Any}(:pipe_breakpoints=>5, :pump_breakpoints=>5)
 # Solve the joint optimal power-water flow problem and store the result.
 result = run_opwf(p_file, w_file, pw_file, p_type, w_type, juniper; wm_ext=wm_ext)
 ```
-
-This example will likely take over a minute to solve.
 
 ### (Optional) Solving the Problem with Gurobi
 Note that [Gurobi's `NonConvex=2` parameter setting](https://www.gurobi.com/documentation/9.0/refman/nonconvex.html) ensures it will correctly handle the nonconvex quadratic constraints that link power and water variables.
@@ -97,20 +95,20 @@ result = run_opwf(p_file, w_file, pw_file, p_type, w_type, juniper; wm_ext=wm_ex
 
 For example, the algorithm's runtime and final objective value can be accessed with
 ```
-result["solve_time"]
-result["objective"]
+result["solve_time"] # Total solve time required (seconds).
+result["objective"] # Final objective value (in units of the objective).
 ```
 
 The `"solution"` field contains detailed information about the solution produced by the `run` method.
-For example, the following can be used to inspect the temporal variation in the volume of tank 1:
+For example, the following can be used to inspect the temporal variation in the volume of tank 1 in the water distribution network:
 ```
 tank_1_volume = Dict(nw=>data["tank"]["10"]["V"] for (nw, data) in result["solution"]["nw"])
 ```
 
-For more information about PowerWaterModels result data see the [PowerWaterModels Result Data Format](@ref) section.
+For more information about PowerWaterModels result data, see the [PowerWaterModels Result Data Format](@ref) section.
 
 ## Modifying Network Data
-The following example demonstrates one way to perform multiple PowerWaterModels solves while modifying network data in Julia.
+The following example demonstrates one way to perform PowerWaterModels solves while modifying network data.
 ```julia
 p_data, w_data, pw_data = parse_files(p_file, w_file, pw_file)
 

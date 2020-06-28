@@ -37,7 +37,7 @@ Installation of the JuMP interfaces to Juniper, Ipopt, and Cbc can be performed 
 ] add JuMP Juniper Ipopt Cbc
 ```
 
-After installation of the required solvers, an example optimal power-water flow problem (whose file inputs can be found in the `examples` directory within the [PowerWaterModels repository](https://github.com/lanl-ansi/PowerWaterModels.jl) can be solved via
+After installation of the required solvers, an example optimal power-water flow problem (whose file inputs can be found in the `examples` directory within the [PowerWaterModels repository](https://github.com/lanl-ansi/PowerWaterModels.jl)) can be solved via
 
 ```julia
 using JuMP, Juniper, Ipopt, Cbc
