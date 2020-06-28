@@ -13,10 +13,12 @@ end
 ""
 function instantiate_model(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_data::Dict{String,<:Any}, p_type::Type, w_type::Type, build_method; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], wm_ext=Dict{Symbol,Any}(), kwargs...)
     # Ensure network consistency, here.
-    @assert networks_are_consistent(p_data, w_data)
+    if !networks_are_consistent(p_data, w_data)
+        Memento.error(_LOGGER, "Multinetworks are not of the same length.")
+    end
 
     # Modify the loads associated with pumps.
-    _modify_loads!(p_data, w_data, pw_data)
+    p_data = _modify_loads(p_data, w_data, pw_data)
 
     # Instantiate the WaterModels object.
     wm = _WM.instantiate_model(w_data, w_type, m->nothing;
@@ -36,22 +38,24 @@ end
 
 ""
 function run_model(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_data::Dict{String,<:Any}, p_type::Type, w_type::Type, optimizer, build_method; pm_solution_processors=[], wm_solution_processors=[], pm_ref_extensions::Vector{<:Function}=Vector{Function}([]), wm_ref_extensions=[], wm_ext=Dict{Symbol,Any}(), kwargs...)
-    start_time = time()
+    # Build the model and time its construction.
+    start_time = time() # Start the timer.
     pm, wm = instantiate_model(p_data, w_data, pw_data, p_type, w_type,
         build_method; pm_ref_extensions=pm_ref_extensions,
         wm_ref_extensions=wm_ref_extensions, wm_ext=wm_ext, kwargs...)
     Memento.debug(_LOGGER, "pwm model build time: $(time() - start_time)")
 
-    start_time = time()
+    # Solve the model and build the result, timing both processes.
+    start_time = time() # Start the timer.
     power_result = _IM.optimize_model!(pm, optimizer=optimizer, solution_processors=pm_solution_processors)
     water_result = _IM.build_result(wm, power_result["solve_time"]; solution_processors=wm_solution_processors)
-    Memento.debug(_LOGGER, "pwm model solution time: $(time() - start_time)")
 
-    # Create a combined water-power result object.
+    # Create a combined power-water result object.
     result = power_result # Contains most of the result data.
 
     # FIXME: There could possibly be component name clashes, here.
     _IM.update_data!(result["solution"], water_result["solution"])
+    Memento.debug(_LOGGER, "pwm model solution time: $(time() - start_time)")
 
     # Return the combined result dictionary.
     return result

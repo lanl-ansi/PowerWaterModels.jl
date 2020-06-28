@@ -32,7 +32,7 @@ function parse_files(p_file::String, w_file::String, pw_file::String)
     pw_data = parse_json(pw_file) # Power-water network linkage data.
 
     # Create new network data, where network sizes match.
-    p_data, w_data = make_consistent_networks(p_data, w_data)
+    p_data, w_data = make_multinetworks(p_data, w_data)
 
     # Return three data dictionaries.
     return p_data, w_data, pw_data

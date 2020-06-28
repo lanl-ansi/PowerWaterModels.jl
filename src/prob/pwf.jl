@@ -1,6 +1,6 @@
-# Definitions for solving a combined water and power flow feasibility problem.
+# Definitions for solving a joint power-water flow feasibility problem.
 
-"Entry point into running the power-water flow feasibility problem."
+"Entry point for running the power-water flow feasibility problem."
 function run_pwf(pfile, wfile, pwfile, ptype, wtype, optimizer; kwargs...)
     return run_model(pfile, wfile, pwfile, ptype, wtype, optimizer, build_pwf; kwargs...)
 end

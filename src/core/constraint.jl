@@ -31,7 +31,7 @@ function _get_pump_load_expression(pm::_PM.AbstractPowerModel, wm::_WM.AbstractD
 end
 
 
-function _get_pump_power_coeff(pm::_PM.AbstractPowerModel, wm::_WM.AbstractUndirectedFlowModel; nw::Int=pm.cnw)
+function _get_pump_power_coeff(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel; nw::Int=pm.cnw)
     efficiency = 0.85 # TODO: How can the efficiency curve be used?
     rho = 1000.0 # Water density (kilogram per cubic meter).
     gravity = 9.80665 # Gravitational acceleration (meter per second squared).

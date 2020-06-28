@@ -1,8 +1,8 @@
 # Definitions for solving a joint optimal power-water flow problem.
 
-"Entry point into running the optimal power-water flow problem."
-function run_opwf(pfile, wfile, pwfile, ptype, wtype, optimizer; kwargs...)
-    return run_model(pfile, wfile, pwfile, ptype, wtype, optimizer, build_opwf; kwargs...)
+"Entry point for running the optimal power-water flow problem."
+function run_opwf(p_file, w_file, pw_file, p_type, w_type, optimizer; kwargs...)
+    return run_model(p_file, w_file, pw_file, p_type, w_type, optimizer, build_opwf; kwargs...)
 end
 
 
@@ -15,7 +15,8 @@ function build_opwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel)
     _WM.build_mn_wf(wm)
 
     for (nw, network) in _PMD.nws(pm)
-        loads = _PMD.ref(pm, nw, :load) # Loads in the power network.
+        # Get all loads defined in the power network.
+        loads = _PMD.ref(pm, nw, :load)
 
         # Constrain load variables if they are connected to a pump.
         for (i, load) in filter(x -> "pump_id" in keys(x.second), loads)
@@ -28,6 +29,6 @@ function build_opwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel)
         end
     end
 
-    # Add a feasibility-only objective.
+    # Add the objective that minimizes power generation costs.
     _PM.objective_min_fuel_cost(pm)
 end
