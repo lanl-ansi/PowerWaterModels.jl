@@ -15,7 +15,8 @@ function build_pwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel)
     _WM.build_mn_wf(wm)
 
     for (nw, network) in _PMD.nws(pm)
-        loads = _PMD.ref(pm, nw, :load) # Loads in the power network.
+        # Get all loads defined in the power network.
+        loads = _PMD.ref(pm, nw, :load)
 
         # Constrain load variables if they are connected to a pump.
         for (i, load) in filter(x -> "pump_id" in keys(x.second), loads)
