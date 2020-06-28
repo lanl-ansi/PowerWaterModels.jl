@@ -18,6 +18,23 @@ Finally, test that the package works by executing
 ```
 
 ## Selection of an Optimization Solver
+Note that Juniper is not the best-performing choice of solver for this formulation.
+At the time of writing, [Gurobi](https://github.com/jump-dev/Gurobi.jl) appears to be the best choice for this joint formulation.
+To solve the same problem with Gurobi, it can first be installed via
+
+```julia
+] add Gurobi
+```
+
+Then, the problem can be solved using
+
+```julia
+# Solve the joint optimal power-water flow problem and store its result.
+gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "NonConvex"=>2)
+result = run_opwf(p_file, w_file, pw_file, p_type, w_type, gurobi; wm_ext=wm_ext)
+```
+
+Note that the `NonConvex=2` option ensures Gurobi will correctly handle the constraints that link water and power variables.
 Because of the constraints that link power loads between the two systems in the `LinDist3FlowPowerModel`/`MILPRWaterModel` formulation for optimal power-water flow, the overall model is mixed-integer _nonconvex_ quadratic.
 At the time of writing, [Gurobi](https://github.com/jump-dev/Gurobi.jl) appears to be the best choice for solving this type of problem.
 Assuming Gurobi has been installed on your system, its interface can be installed using the Julia package manager via
