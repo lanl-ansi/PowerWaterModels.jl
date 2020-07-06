@@ -1,7 +1,7 @@
 # PowerWaterModels.jl 
 [![Build Status](https://travis-ci.org/lanl-ansi/PowerWaterModels.jl.svg?branch=master)](https://travis-ci.org/lanl-ansi/PowerWaterModels.jl)
 [![codecov](https://codecov.io/gh/lanl-ansi/PowerWaterModels.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/lanl-ansi/PowerWaterModels.jl)
-[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://lanl-ansi.github.io/PowerWaterModels.jl/latest)
+[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://lanl-ansi.github.io/PowerWaterModels.jl/stable/)
 
 PowerWaterModels.jl is a Julia/JuMP package for joint optimization of power and water distribution networks.
 
@@ -10,7 +10,7 @@ PowerWaterModels.jl is a Julia/JuMP package for joint optimization of power and 
 * Optimal Power-Water Flow (opwf)
 
 ## Documentation
-The package [documentation](https://lanl-ansi.github.io/PowerWaterModels.jl/latest/) includes a [quick start guide](https://lanl-ansi.github.io/PowerWaterModels.jl/latest/quickguide).
+The package [documentation](https://lanl-ansi.github.io/PowerWaterModels.jl/stable/) includes a [quick start guide](https://lanl-ansi.github.io/PowerWaterModels.jl/stable/quickguide).
 
 ## Development
 Community-driven development and enhancement of PowerWaterModels is welcomed and encouraged.
