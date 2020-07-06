@@ -1,21 +1,19 @@
 """
     parse_json(path)
 
-Parses a JavaScript Object Notation (JSON) file from the file path `path` and
-returns a dictionary.
+Parses a JavaScript Object Notation (JSON) file from the file path `path` and returns a
+dictionary containing the corresponding parsed data. Primarily used for linkage files.
 """
 function parse_json(path::String)
-    dict = JSON.parsefile(path)
-    dict["per_unit"] = false
-    return dict
+    return JSON.parsefile(path)
 end
 
 
 """
     parse_files(p_file, w_file, pw_file)
 
-Parses power, water, and power-water linking input files and returns three data
-dictionaries for power, water, and power-water linking data, respectively.
+Parses power, water, and power-water linkage input files and returns three data dictionaries
+for power, water, and power-water linkage data, respectively.
 """
 function parse_files(p_file::String, w_file::String, pw_file::String)
     # Read power distribution network data.

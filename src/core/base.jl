@@ -70,21 +70,25 @@ end
 
 """
     run_model(
-        p_data, w_data, pw_data, p_type, w_type, build_method; pm_ref_extensions,
+        p_data, w_data, pw_data, p_type, w_type, optimizer, build_method;
+        pm_solution_processors, wm_solution_processors, pm_ref_extensions,
         wm_ref_extensions, wm_ext, kwargs...)
 
     Instantiates and solves the joint PowerModelsDistribution and WaterModels modeling
     objects from power, water, and linking input data `p_data`, `w_data`, and `pw_data`,
     respectively. Here, `p_type` and `w_type` are the power and water modeling types,
     `build_method` is the build method for the problem specification being considered,
-    `pm_ref_extensions` and `wm_ref_extensions` are arrays of power and water modeling
-    extensions, and `wm_ext` is a dictionary of extra arguments for constructing the
-    WaterModels modeling object. Returns a dictionary of combined results.
+    `pm_solution_processors` and `wm_solution_processors` are arrays of power and water
+    model solution processors, `pm_ref_extensions` and `wm_ref_extensions` are arrays of
+    power and water modeling extensions, and `wm_ext` is a dictionary of extra arguments for
+    constructing the WaterModels modeling object. Returns a dictionary of combined results.
 """
 function run_model(
     p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_data::Dict{String,<:Any},
-    p_type::Type, w_type::Type, optimizer::_MOI.AbstractOptimizer, build_method::Function;
-    pm_solution_processors::Array=[], wm_solution_processors::Array=[],
+    p_type::Type, w_type::Type,
+    optimizer::Union{_MOI.AbstractOptimizer, _MOI.OptimizerWithAttributes},
+    build_method::Function; pm_solution_processors::Array=[],
+    wm_solution_processors::Array=[],
     pm_ref_extensions::Vector{<:Function}=Vector{Function}([]),
     wm_ref_extensions::Vector{<:Function}=Vector{Function}([]),
     wm_ext::Dict{Symbol,Any}=Dict{Symbol,Any}(), kwargs...)
@@ -121,28 +125,29 @@ end
 
 """
     run_model(
-        p_file, w_file, pw_file, p_type, w_type, build_method; pm_ref_extensions,
+        p_file, w_file, pw_file, p_type, w_type, optimizer, build_method;
+        pm_solution_processors, wm_solution_processors, pm_ref_extensions,
         wm_ref_extensions, wm_ext, kwargs...)
 
     Instantiates and solves the joint PowerModelsDistribution and WaterModels modeling
     objects from power, water, and linking input files `p_file`, `w_file`, and `pw_file`,
     respectively. Here, `p_type` and `w_type` are the power and water modeling types,
     `build_method` is the build method for the problem specification being considered,
-    `pm_ref_extensions` and `wm_ref_extensions` are arrays of power and water modeling
-    extensions, and `wm_ext` is a dictionary of extra arguments for constructing the
-    WaterModels modeling object. Returns a dictionary of combined results.
+    `pm_solution_processors` and `wm_solution_processors` are arrays of power and water
+    model solution processors, `pm_ref_extensions` and `wm_ref_extensions` are arrays of
+    power and water modeling extensions, and `wm_ext` is a dictionary of extra arguments for
+    constructing the WaterModels modeling object. Returns a dictionary of combined results.
 """
 function run_model(
     p_file::String, w_file::String, pw_file::String, p_type::Type, w_type::Type,
-    optimizer::_MOI.AbstractOptimizer, build_method::Function;
-    pm_ref_extensions::Vector{<:Function}=Vector{Function}([]),
+    optimizer::Union{_MOI.AbstractOptimizer, _MOI.OptimizerWithAttributes},
+    build_method::Function; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]),
     wm_ref_extensions::Vector{<:Function}=Vector{Function}([]),
     wm_ext::Dict{Symbol,Any}=Dict{Symbol,Any}(), kwargs...)
-
     # Read power, water, and linkage data from files.
     p_data, w_data, pw_data = parse_files(p_file, w_file, pw_file)
 
-    # Instantiate the PowerWaterModels modeling object.
+    # Instantiate and solve the PowerWaterModels modeling object.
     return run_model(
         p_data, w_data, pw_data, p_type, w_type, optimizer, build_method;
         pm_ref_extensions=pm_ref_extensions, wm_ref_extensions=wm_ref_extensions,
