@@ -49,16 +49,24 @@ for status_code_enum in [TerminationStatusCode, ResultStatusCode]
 end
 
 # Export PowerModels modeling types for ease of use.
-power_models = filter(x -> endswith(string(x), "PowerModel") &&
-    !occursin("Abstract", string(x)), names(PowerModelsDistribution))
-for x in power_models @eval import PowerModelsDistribution: $(x) end
-for x in power_models @eval export $(x) end
+power_models = names(PowerModelsDistribution)
+power_models = filter(x -> endswith(string(x), "PowerModel"), power_models)
+power_models = filter(x -> !occursin("Abstract", string(x)), power_models)
+
+for x in power_models
+    @eval import PowerModelsDistribution: $(x)
+    @eval export $(x)
+end
 
 # Export WaterModels modeling types for ease of use.
-water_models = filter(x -> endswith(string(x), "WaterModel") &&
-    !occursin("Abstract", string(x)), names(WaterModels))
-for x in water_models @eval import WaterModels: $(x) end
-for x in water_models @eval export $(x) end
+water_models = names(WaterModels)
+water_models = filter(x -> endswith(string(x), "WaterModel"), water_models)
+water_models = filter(x -> !occursin("Abstract", string(x)), water_models)
+
+for x in water_models
+    @eval import WaterModels: $(x)
+    @eval export $(x)
+end
 
 # Export from InfrastructureModels.
 export ids, ref, var, con, sol, nw_ids, nws, optimize_model!
