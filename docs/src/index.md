@@ -54,7 +54,7 @@ w_file = "examples/data/epanet/cohen-short.inp" # Water network.
 pw_file = "examples/data/json/zamzam.json" # Power-water linking.
 
 # Specify the power and water formulation types separately.
-p_type, w_type = LinDist3FlowPowerModel, MILPRWaterModel
+p_type, w_type = LinDist3FlowPowerModel, PWLRDWaterModel
 
 # Specify the number of breakpoints used in the linearized water formulation.
 wm_ext = Dict{Symbol,Any}(:pipe_breakpoints=>5, :pump_breakpoints=>5)

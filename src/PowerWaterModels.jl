@@ -1,16 +1,19 @@
 module PowerWaterModels
-    import JSON
-    import JuMP
-    import Memento
     import PowerModelsDistribution
     import WaterModels
 
+    # Initialize shortened package names for convenience.
     const _PMD = PowerModelsDistribution
     const _WM = WaterModels
 
     const _IM = _PMD._IM # InfrastructureModels
     const _PM = _PMD._PM # PowerModels
     const _MOI = _IM._MOI # MathOptInterface
+
+    # Borrow dependencies from other packages.
+    const JSON = _WM.JSON
+    const JuMP = _IM.JuMP
+    const Memento = _IM.Memento
 
     # Create our module level logger (this will get precompiled)
     const _LOGGER = Memento.getlogger(@__MODULE__)

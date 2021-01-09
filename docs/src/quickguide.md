@@ -1,5 +1,5 @@
 # Quick Start Guide
-The following guide walks through the solution of an optimal power-water flow (`opwf`) problem using the `LinDist3FlowPowerModel` power distribution network formulation (specified via [PowerModelsDistribution](https://github.com/lanl-ansi/PowerModelsDistribution.jl)) and the `MILPRWaterModel` water distribution network formulation (specified via [WaterModels](https://github.com/lanl-ansi/WaterModels.jl)).
+The following guide walks through the solution of an optimal power-water flow (`opwf`) problem using the `LinDist3FlowPowerModel` power distribution network formulation (specified via [PowerModelsDistribution](https://github.com/lanl-ansi/PowerModelsDistribution.jl)) and the `PWLRDWaterModel` water distribution network formulation (specified via [WaterModels](https://github.com/lanl-ansi/WaterModels.jl)).
 
 ## Installation of PowerWaterModels
 The latest stable release of PowerWaterModels can be installed using the Julia package manager with
@@ -20,7 +20,7 @@ Finally, test that the package works as expected by executing
 ## Installation of an Optimization Solver
 At least one optimization solver is required to run PowerWaterModels.
 The solver selected typically depends on the type of problem formulation being employed.
-Because of the constraints that link power loads between the two systems in the `LinDist3FlowPowerModel`/`MILPRWaterModel` formulation, the overall model considered in this tutorial is mixed-integer _nonconvex_ quadratic.
+Because of the constraints that link power loads between the two systems in the `LinDist3FlowPowerModel`/`PWLRDWaterModel` formulation, the overall model considered in this tutorial is mixed-integer _nonconvex_ quadratic.
 One example of an optimization package capable of solving this problem is the mixed-integer nonlinear programming solver [Juniper](https://github.com/lanl-ansi/Juniper.jl).
 Juniper itself depends on the installation of a nonlinear programming solver (e.g., [Ipopt](https://github.com/jump-dev/Ipopt.jl)) and a mixed-integer linear programming solver (e.g., [CBC](https://github.com/jump-dev/Cbc.jl)).
 Installation of the JuMP interfaces to Juniper, Ipopt, and Cbc can be performed via the Julia package manager, i.e.,
@@ -56,7 +56,7 @@ w_file = "examples/data/epanet/cohen-short.inp" # Water network.
 pw_file = "examples/data/json/zamzam.json" # Power-water linking.
 
 # Specify the power and water formulation types separately.
-p_type, w_type = LinDist3FlowPowerModel, MILPRWaterModel
+p_type, w_type = LinDist3FlowPowerModel, PWLRDWaterModel
 
 # Specify the number of breakpoints used in the linearized water formulation.
 wm_ext = Dict{Symbol,Any}(:pipe_breakpoints=>5, :pump_breakpoints=>5)

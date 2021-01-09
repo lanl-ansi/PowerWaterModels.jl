@@ -2,7 +2,7 @@
     p_file = "$(pmd_path)/test/data/opendss/case2_diag.dss"
     w_file = "$(wm_path)/test/data/epanet/snapshot/pump-hw-lps.inp"
     pw_file = "../test/data/json/case2-pump.json"
-    p_type, w_type = LinDist3FlowPowerModel, MILPRWaterModel
+    p_type, w_type = LinDist3FlowPowerModel, PWLRDWaterModel
 
     @testset "instantiate_model (with file inputs)" begin
         pm, wm = instantiate_model(p_file, w_file, pw_file, p_type, w_type, build_pwf)

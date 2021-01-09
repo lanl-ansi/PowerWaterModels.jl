@@ -1,11 +1,15 @@
 using PowerWaterModels
 
-import Memento
-
+ # Initialize shortened package names for convenience.
 const _IM = PowerWaterModels._IM
 const _PM = PowerWaterModels._PM
 const _PMD = PowerWaterModels._PMD
 const _WM = PowerWaterModels._WM
+
+# Borrow dependencies from other packages.
+const JSON = _WM.JSON
+const JuMP = _IM.JuMP
+const Memento = _IM.Memento
 
 # Suppress warnings during testing.
 Memento.setlevel!(Memento.getlogger(_IM), "error")
@@ -16,7 +20,6 @@ PowerWaterModels.logger_config!("error")
 
 import Cbc
 import Ipopt
-import JuMP
 import Juniper
 
 using Test
