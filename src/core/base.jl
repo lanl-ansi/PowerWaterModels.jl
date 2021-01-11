@@ -85,8 +85,7 @@ end
 """
 function run_model(
     p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_data::Dict{String,<:Any},
-    p_type::Type, w_type::Type,
-    optimizer::Union{_MOI.AbstractOptimizer, _MOI.OptimizerWithAttributes},
+    p_type::Type, w_type::Type, optimizer,
     build_method::Function; pm_solution_processors::Array=[],
     wm_solution_processors::Array=[],
     pm_ref_extensions::Vector{<:Function}=Vector{Function}([]),
