@@ -42,6 +42,7 @@ module PowerWaterModels
     include("core/base.jl")
     include("core/data.jl")
     include("core/constraint.jl")
+    include("core/objective.jl")
 
     include("prob/pwf.jl")
     include("prob/opwf.jl")
