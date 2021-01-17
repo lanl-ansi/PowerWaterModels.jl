@@ -46,7 +46,9 @@ using PowerWaterModels
 # Set up the optimization solvers.
 ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0, "sb"=>"yes")
 cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, "logLevel"=>0)
-juniper = JuMP.optimizer_with_attributes(Juniper.Optimizer, "nl_solver"=>ipopt, "mip_solver"=>cbc)
+juniper = JuMP.optimizer_with_attributes(
+    Juniper.Optimizer, "nl_solver"=>ipopt, "mip_solver"=>cbc,
+    "branch_strategy" => :MostInfeasible, "time_limit" => 60.0)
 
 # Specify paths to the power, water, and power-water linking files.
 p_file = "examples/data/opendss/IEEE13_CDPSM.dss" # Power network.
@@ -57,7 +59,7 @@ pw_file = "examples/data/json/zamzam.json" # Power-water linking.
 p_type, w_type = LinDist3FlowPowerModel, PWLRDWaterModel
 
 # Specify the number of breakpoints used in the linearized water formulation.
-wm_ext = Dict{Symbol,Any}(:pipe_breakpoints=>5, :pump_breakpoints=>5)
+wm_ext = Dict{Symbol,Any}(:pipe_breakpoints=>2, :pump_breakpoints=>3)
 
 # Solve the joint optimal power-water flow problem and store the result.
 result = run_opwf(p_file, w_file, pw_file, p_type, w_type, juniper; wm_ext=wm_ext)
@@ -66,7 +68,7 @@ result = run_opwf(p_file, w_file, pw_file, p_type, w_type, juniper; wm_ext=wm_ex
 After solving the problem, results can then be analyzed, e.g.,
 
 ```julia
-# The objective's local minimum, representing the cost of power generation.
+# Objective value, representing the cost of power generation.
 result["objective"]
 
 # Generator 1's real power generation at the first time step.

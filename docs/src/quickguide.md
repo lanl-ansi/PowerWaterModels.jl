@@ -48,7 +48,9 @@ using PowerWaterModels
 # Set up the optimization solvers.
 ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0, "sb"=>"yes")
 cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, "logLevel"=>0)
-juniper = JuMP.optimizer_with_attributes(Juniper.Optimizer, "nl_solver"=>ipopt, "mip_solver"=>cbc)
+juniper = JuMP.optimizer_with_attributes(
+    Juniper.Optimizer, "nl_solver"=>ipopt, "mip_solver"=>cbc,
+    "branch_strategy" => :MostInfeasible, "time_limit" => 60.0)
 
 # Specify paths to the power, water, and power-water linking files.
 p_file = "examples/data/opendss/IEEE13_CDPSM.dss" # Power network.
@@ -59,14 +61,14 @@ pw_file = "examples/data/json/zamzam.json" # Power-water linking.
 p_type, w_type = LinDist3FlowPowerModel, PWLRDWaterModel
 
 # Specify the number of breakpoints used in the linearized water formulation.
-wm_ext = Dict{Symbol,Any}(:pipe_breakpoints=>5, :pump_breakpoints=>5)
+wm_ext = Dict{Symbol,Any}(:pipe_breakpoints=>2, :pump_breakpoints=>3)
 
 # Solve the joint optimal power-water flow problem and store the result.
 result = run_opwf(p_file, w_file, pw_file, p_type, w_type, juniper; wm_ext=wm_ext)
 ```
 
 ### (Optional) Solving the Problem with Gurobi
-Note that [Gurobi's `NonConvex=2` parameter setting](https://www.gurobi.com/documentation/9.1/refman/nonconvex.html) ensures it will correctly handle the nonconvex quadratic constraints that link power and water variables.
+Note that [Gurobi's `NonConvex=2` parameter setting](https://www.gurobi.com/documentation/9.1/refman/nonconvex.html) ensures it will correctly handle the nonconvex quadratic constraints that are associated with the power network formulation.
 The problem considered above can then be solved using Gurobi (instead of Juniper) via
 
 ```julia
@@ -78,13 +80,12 @@ result_grb = run_opwf(p_file, w_file, pw_file, p_type, w_type, gurobi; wm_ext=wm
 ```
 
 First, note that Gurobi solves the problem much more quickly than Juniper.
-Also note the slight difference in the objectives obtained between Juniper and Gurobi, i.e.,
+Also note the difference in the objectives obtained between Juniper and Gurobi, i.e.,
 ```
 result["objective"] - result_grb["objective"] # Positive difference.
 ```
 
-The objective value obtained via Gurobi is _smaller_ than the one obtained via Juniper.
-This is because Gurobi is capable of solving mixed-integer nonconvex quadratic programs to _global optimality_, whereas Juniper can only solve them to _local optimality_ (i.e., feasibility).
+The objective value obtained via Gurobi is _smaller_ than the one obtained via Juniper, indicating that Gurobi discovered a better solution.
 
 ## Obtaining Results
 The `run` commands in PowerWaterModels return detailed results data in the form of a Julia `Dict`.
