@@ -1,5 +1,5 @@
 # PowerWaterModels.jl 
-[![Build Status](https://travis-ci.org/lanl-ansi/PowerWaterModels.jl.svg?branch=master)](https://travis-ci.org/lanl-ansi/PowerWaterModels.jl)
+[![Build Status](https://github.com/lanl-ansi/PowerWaterModels.jl/workflows/CI/badge.svg?branch=master)](https://github.com/lanl-ansi/PowerWaterModels.jl/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/lanl-ansi/PowerWaterModels.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/lanl-ansi/PowerWaterModels.jl)
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://lanl-ansi.github.io/PowerWaterModels.jl/stable)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://lanl-ansi.github.io/PowerWaterModels.jl/dev)
