@@ -20,7 +20,7 @@ Finally, test that the package works as expected by executing
 ## Installation of an Optimization Solver
 At least one optimization solver is required to run PowerWaterModels.
 The solver selected typically depends on the type of problem formulation being employed.
-Because of the constraints that link power loads between the two systems in the `LinDist3FlowPowerModel`/`PWLRDWaterModel` formulation, the overall model considered in this tutorial is mixed-integer _nonconvex_ quadratic.
+Because of the `LinDist3FlowPowerModel`/`PWLRDWaterModel` joint formulation, the overall model considered in this tutorial is mixed-integer _nonconvex_ quadratic.
 One example of an optimization package capable of solving this problem is the mixed-integer nonlinear programming solver [Juniper](https://github.com/lanl-ansi/Juniper.jl).
 Juniper itself depends on the installation of a nonlinear programming solver (e.g., [Ipopt](https://github.com/jump-dev/Ipopt.jl)) and a mixed-integer linear programming solver (e.g., [CBC](https://github.com/jump-dev/Cbc.jl)).
 Installation of the JuMP interfaces to Juniper, Ipopt, and Cbc can be performed via the Julia package manager, i.e.,
@@ -66,7 +66,7 @@ result = run_opwf(p_file, w_file, pw_file, p_type, w_type, juniper; wm_ext=wm_ex
 ```
 
 ### (Optional) Solving the Problem with Gurobi
-Note that [Gurobi's `NonConvex=2` parameter setting](https://www.gurobi.com/documentation/9.0/refman/nonconvex.html) ensures it will correctly handle the nonconvex quadratic constraints that link power and water variables.
+Note that [Gurobi's `NonConvex=2` parameter setting](https://www.gurobi.com/documentation/9.1/refman/nonconvex.html) ensures it will correctly handle the nonconvex quadratic constraints that link power and water variables.
 The problem considered above can then be solved using Gurobi (instead of Juniper) via
 
 ```julia
@@ -113,9 +113,9 @@ The following example demonstrates one way to perform PowerWaterModels solves wh
 p_data, w_data, pw_data = parse_files(p_file, w_file, pw_file)
 
 for (nw, network) in w_data["nw"]
-    network["junction"]["3"]["demand"] *= 0.1
-    network["junction"]["4"]["demand"] *= 0.1
-    network["junction"]["5"]["demand"] *= 0.1
+    network["demand"]["3"]["flow_nominal"] *= 0.1
+    network["demand"]["4"]["flow_nominal"] *= 0.1
+    network["demand"]["5"]["flow_nominal"] *= 0.1
 end
 
 result_mod = run_opwf(p_data, w_data, pw_data, p_type, w_type, juniper; wm_ext=wm_ext)
