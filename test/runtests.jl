@@ -32,7 +32,7 @@ ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "acceptable_tol"=>1.0e-8
 cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, "logLevel"=>0)
 juniper = JuMP.optimizer_with_attributes(
     Juniper.Optimizer, "nl_solver"=>ipopt, "mip_solver"=>cbc, "log_levels"=>[],
-    "branch_strategy" => "MostInfeasible", "time_limit" => 60.0)
+    "branch_strategy" => :MostInfeasible, "time_limit" => 60.0)
 
 # Setup common test data paths (from dependencies).
 pm_path = joinpath(dirname(pathof(_PM)), "..")
