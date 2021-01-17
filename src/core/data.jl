@@ -37,29 +37,6 @@ function make_multinetworks(p_data::Dict{String,<:Any}, w_data::Dict{String,<:An
 end
 
 
-function _get_max_pump_power(pump::Dict{String,<:Any}, data::Dict{String,<:Any})
-    # Get the minimum efficiency used in describing the pump.
-    if haskey(pump, "efficiency_curve")
-        min_eff = minimum(x[2] for x in pump["efficiency_curve"])
-    else
-        min_eff = data["option"]["energy"]["global_efficiency"]
-    end
-
-    # Get important maximal gain and flow values.
-    c = _WM._get_function_from_pump_curve(pump["pump_curve"])
-    q_at_max = -0.5 * c[2] * inv(c[1]) 
-    g_max = maximum(x[2] for x in pump["pump_curve"])
-    g_max = max(g_max, c[1] * q_at_max^2 + c[2] * q_at_max + c[3])
-    q_max = (-c[2] + sqrt(c[2]^2 - 4.0*c[1]*c[3])) * inv(2.0*c[1])
-    q_max = max(q_max, (-c[2] - sqrt(c[2]^2 - 4.0*c[1]*c[3])) * inv(2.0*c[1]))
-
-    # TODO: The bound below can likely be improved.
-    rho = 1000.0 # Water density (kilogram per cubic meter).
-    gravity = 9.80665 # Gravitational acceleration (meter per second squared).
-    return inv(min_eff) * rho * gravity * g_max * q_max
-end
-
-
 function _make_power_multinetwork(p_data::Dict{String,<:Any})
     if haskey(p_data, "source_type") && p_data["source_type"] == "matpower"
         return _IM.make_multinetwork(p_data, _PM._pm_global_keys)
@@ -107,7 +84,9 @@ function _modify_loads(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, p
             # Estimate maximum pump power in units used by the power network.
             base_power = 1.0e-6 * inv(p_data["nw"][nw]["baseMVA"])
             pump = _get_pump_from_name(link["pump_source_id"], w_data["nw"][nw])
-            max_pump_power = base_power * _get_max_pump_power(pump, w_data)
+            node_fr = w_data["nw"][nw]["node"][string(pump["node_fr"])]
+            node_to = w_data["nw"][nw]["node"][string(pump["node_to"])]
+            max_pump_power = base_power * _WM._calc_pump_power_max(pump, node_fr, node_to)
 
             # Change the loads associated with pumps.
             load = _get_load_from_name(link["load_source_id"], p_data["nw"][nw])

@@ -27,23 +27,23 @@ end
 # `using PowerWaterModels`
 
 # so that users do not need to import JuMP to use a solver with PowerWaterModels
-import JuMP: with_optimizer
+import PowerWaterModels._IM.JuMP: with_optimizer
 export with_optimizer
 
 # so that users do not need to import JuMP to use a solver with PowerWaterModels
 # note does appear to be work with JuMP v0.20, but throws "could not import" warning
-import JuMP: optimizer_with_attributes
+import PowerWaterModels._IM.JuMP: optimizer_with_attributes
 export optimizer_with_attributes
 
-import InfrastructureModels._MOI: TerminationStatusCode
+import PowerWaterModels._IM._MOI: TerminationStatusCode
 export TerminationStatusCode
 
-import InfrastructureModels._MOI: ResultStatusCode
+import PowerWaterModels._IM._MOI: ResultStatusCode
 export ResultStatusCode
 
 for status_code_enum in [TerminationStatusCode, ResultStatusCode]
     for status_code in instances(status_code_enum)
-        @eval import InfrastructureModels._MOI: $(Symbol(status_code))
+        @eval import PowerWaterModels._IM._MOI: $(Symbol(status_code))
         @eval export $(Symbol(status_code))
     end
 end

@@ -17,24 +17,7 @@ function _get_power_load_expression(pm::_PM.AbstractPowerModel, i::Int; nw::Int=
 end
 
 
-function _get_pump_load_expression(pm::_PM.AbstractPowerModel, wm::_WM.AbstractUndirectedFlowModel, a::Int; nw::Int=pm.cnw)
-    coeff = _get_pump_power_coeff(pm, wm; nw=nw)
-    q, g = _WM.var(wm, nw, :q, a), _WM.var(wm, nw, :g, a)
-    return JuMP.@expression(wm.model, coeff * g * q)
-end
-
-
-function _get_pump_load_expression(pm::_PM.AbstractPowerModel, wm::_WM.AbstractDirectedFlowModel, a::Int; nw::Int=pm.cnw)
-    coeff = _get_pump_power_coeff(pm, wm; nw=nw)
-    qp, g = _WM.var(wm, nw, :qp, a), _WM.var(wm, nw, :g, a)
-    return JuMP.@expression(wm.model, coeff * g * qp)
-end
-
-
-function _get_pump_power_coeff(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel; nw::Int=pm.cnw)
-    efficiency = 0.85 # TODO: How can the efficiency curve be used?
-    rho = 1000.0 # Water density (kilogram per cubic meter).
-    gravity = 9.80665 # Gravitational acceleration (meter per second squared).
-    scalar = 1.0e-6 * inv(_PM.ref(pm, nw, :baseMVA)) # Scaling factor for power.
-    coeff = scalar * inv(efficiency) * rho * gravity
+function _get_pump_load_expression(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel, a::Int; nw::Int=pm.cnw)
+    scaling = 1.0e-6 * inv(_PM.ref(pm, nw, :baseMVA)) # Scaling factor for power.
+    return JuMP.@expression(wm.model, scaling * _WM.var(wm, nw, :P_pump, a))
 end
