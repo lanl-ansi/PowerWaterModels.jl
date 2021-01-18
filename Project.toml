@@ -9,7 +9,7 @@ PowerModelsDistribution = "d7431456-977f-11e9-2de3-97ff7677985e"
 WaterModels = "7c60b362-08f4-5b14-8680-cd67a3e18348"
 
 [compat]
-PowerModelsDistribution = "~0.9"
+PowerModelsDistribution = "~0.9, 0.10"
 WaterModels = "~0.6"
 julia = "^1"
 
