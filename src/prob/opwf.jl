@@ -7,7 +7,7 @@ end
 
 
 "Construct the optimal power-water flow problem."
-function build_opwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel)
+function build_opwf(pm::_PMD.AbstractUnbalancedPowerModel, wm::_WM.AbstractWaterModel)
     # Power-only related variables and constraints.
     _PMD.build_mn_mc_mld_simple(pm)
 

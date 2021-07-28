@@ -1,11 +1,16 @@
 @testset "src/core/base.jl" begin
     p_file = "$(pmd_path)/test/data/opendss/case2_diag.dss"
     w_file = "$(wm_path)/test/data/epanet/snapshot/pump-hw-lps.inp"
-    pw_file = "../test/data/json/case2-pump.json"
-    p_type, w_type = LinDist3FlowPowerModel, PWLRDWaterModel
+    link_file = "../test/data/json/case2-pump.json"
 
     @testset "instantiate_model (with file inputs)" begin
-        pm, wm = instantiate_model(p_file, w_file, pw_file, p_type, w_type, build_pwf)
+        pwm_type = PowerWaterModel{LinDist3FlowPowerModel, PWLRDWaterModel}
+        pwm = instantiate_model(p_file, w_file, link_file, pwm_type, build_pwf)
+        @test typeof(pwm.model) == JuMP.Model
+    end
+
+    @testset "instantiate_model (with file inputs)" begin
+        pwm = instantiate_model(p_file, w_file, pw_file, p_type, w_type, build_pwf)
         @test pm.model == wm.model
     end
 

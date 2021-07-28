@@ -1,7 +1,7 @@
 """
     objective_min_max_generation_fluctuation(pm::AbstractPowerModel)
 """
-function objective_min_max_generation_fluctuation(pm::_PM.AbstractPowerModel)
+function objective_min_max_generation_fluctuation(pm::_PMD.AbstractUnbalancedPowerModel)
     z = JuMP.@variable(pm.model, lower_bound = 0.0)
     nw_ids = sort(collect(_PM.nw_ids(pm)))
 

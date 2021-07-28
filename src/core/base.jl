@@ -1,6 +1,6 @@
 "Root of the PowerWaterModels formulation hierarchy."
 abstract type AbstractPowerWaterModel{
-    T1<:_PMD.AbstractPowerModel,
+    T1<:_PMD.AbstractUnbalancedPowerModel,
     T2<:_WM.AbstractWaterModel,
 } <: _IM.AbstractInfrastructureModel end
 

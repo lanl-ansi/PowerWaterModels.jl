@@ -7,7 +7,7 @@ end
 
 
 "Construct the power-water flow feasibility problem."
-function build_pwf(pm::_PM.AbstractPowerModel, wm::_WM.AbstractWaterModel)
+function build_pwf(pm::_PMD.AbstractUnbalancedPowerModel, wm::_WM.AbstractWaterModel)
     # Power-only related variables and constraints.
     _PMD.build_mn_mc_mld_simple(pm)
 

@@ -52,16 +52,16 @@ wm_path = joinpath(dirname(pathof(_WM)), "..")
 
     include("PowerWaterModels.jl")
 
-    # include("base.jl")
+    include("base.jl")
 
-    # include("io.jl")
+    include("io.jl")
 
-    # include("data.jl")
+    include("data.jl")
 
-    # include("objective.jl")
+    include("objective.jl")
 
-    # include("pwf.jl")
+    include("pwf.jl")
 
-    # include("opwf.jl")
+    include("opwf.jl")
 
 end
