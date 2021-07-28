@@ -1,37 +1,61 @@
 """
-    parse_json(path)
+    parse_link_file(path)
 
-Parses a JavaScript Object Notation (JSON) file from the file path `path` and returns a
-dictionary containing the corresponding parsed data. Primarily used for linkage files.
+Parses a linking file from the file path `path`, depending on the file extension, and
+returns a PowerWaterModels data structure that links power and water networks (a dictionary).
 """
-function parse_json(path::String)
-    return JSON.parsefile(path)
+function parse_link_file(path::String)
+    if endswith(path, ".json")
+        data = parse_json(path)
+    else
+        error("\"$(path)\" is not a valid file type.")
+    end
+
+    if !haskey(data, "multiinfrastructure")
+        data["multiinfrastructure"] = true
+    end
+
+    return data
+end
+
+
+function parse_power_file(file_path::String; skip_correct::Bool = true)
+    # TODO: What should `skip_correct` do, here?
+    data = _PMD.parse_file(file_path)
+    return _IM.ismultiinfrastructure(data) ? data :
+           Dict("multiinfrastructure" => true, "it" => Dict(_PMD.pmd_it_name => data))
+end
+
+
+function parse_water_file(file_path::String; skip_correct::Bool = true)
+    data = _WM.parse_file(file_path; skip_correct = skip_correct)
+    return _IM.ismultiinfrastructure(data) ? data :
+           Dict("multiinfrastructure" => true, "it" => Dict(_WM.wm_it_name => data))
 end
 
 
 """
-    parse_files(p_file, w_file, pw_file)
+    parse_files(power_path, water_path, link_path)
 
-Parses power, water, and power-water linkage input files and returns three data dictionaries
-for power, water, and power-water linkage data, respectively.
+Parses power, water, and linking data from `power_path`, `water_path`, and `link_path`,
+respectively, into a single data dictionary. Returns a PowerWaterModels
+multi-infrastructure data structure keyed by the infrastructure type `it`.
 """
-function parse_files(p_file::String, w_file::String, pw_file::String)
-    # Read power distribution network data.
-    if split(p_file, ".")[end] == "m" # If reading a MATPOWER file.
-        p_data = _PM.parse_file(p_file)
-        _scale_loads!(p_data, inv(3.0))
-        _PMD.make_multiconductor!(p_data, real(3))
-    else # Otherwise, use the PowerModelsDistribution parser.
-        p_data = _PMD.parse_file(p_file)
-    end
+function parse_files(power_path::String, water_path::String, link_path::String)
+    joint_network_data = parse_link_file(link_path)
+    _IM.update_data!(joint_network_data, parse_power_file(power_path))
+    _IM.update_data!(joint_network_data, parse_water_file(water_path))
 
-    # Parse water and power-water linkage data.
-    w_data = _WM.parse_file(w_file) # Water distribution network data.
-    pw_data = parse_json(pw_file) # Power-water network linkage data.
+    # Store whether or not each network uses per-unit data.
+    p_per_unit = get(joint_network_data["it"][_PMD.pmd_it_name], "per_unit", false)
+    w_per_unit = get(joint_network_data["it"][_WM.wm_it_name], "per_unit", false)
 
-    # Create new network data, where network sizes match.
-    p_data, w_data = make_multinetworks(p_data, w_data)
+    # Correct the network data.
+    correct_network_data!(joint_network_data)
 
-    # Return three data dictionaries.
-    return p_data, w_data, pw_data
+    # Ensure all datasets use the same units for power.
+    resolve_units!(joint_network_data, p_per_unit, w_per_unit)
+
+    # Return the network dictionary.
+    return joint_network_data
 end

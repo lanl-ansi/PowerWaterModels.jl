@@ -1,13 +1,13 @@
 module PowerWaterModels
+    import InfrastructureModels
+    import InfrastructureModels: optimize_model!, @im_fields, ismultinetwork, nw_id_default
     import PowerModelsDistribution
     import WaterModels
 
     # Initialize shortened package names for convenience.
     const _PMD = PowerModelsDistribution
     const _WM = WaterModels
-
-    const _IM = _PMD._IM # InfrastructureModels
-    const _PM = _PMD._PM # PowerModels
+    const _IM = InfrastructureModels
     const _MOI = _IM._MOI # MathOptInterface
 
     # Borrow dependencies from other packages.
@@ -37,15 +37,17 @@ module PowerWaterModels
         Memento.config!(Memento.getlogger("PowerWaterModels"), level)
     end
 
-    include("io/common.jl")
+    const _pwm_global_keys = union(_PMD._pmd_global_keys, _WM._wm_global_keys)
 
-    include("core/base.jl")
-    include("core/data.jl")
-    include("core/constraint.jl")
-    include("core/objective.jl")
+    # include("io/common.jl")
 
-    include("prob/pwf.jl")
-    include("prob/opwf.jl")
+    # include("core/base.jl")
+    # include("core/data.jl")
+    # include("core/constraint.jl")
+    # include("core/objective.jl")
+
+    # include("prob/pwf.jl")
+    # include("prob/opwf.jl")
 
     # This must come last to support automated export.
     include("core/export.jl")
