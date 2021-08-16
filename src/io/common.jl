@@ -20,7 +20,7 @@ end
 
 
 function parse_power_file(file_path::String; skip_correct::Bool = true)
-    # TODO: What should `skip_correct` do, here?
+    # TODO: What should `skip_correct` do, here, if anything?
     data = _PMD.parse_file(file_path)
     return _IM.ismultiinfrastructure(data) ? data :
            Dict("multiinfrastructure" => true, "it" => Dict(_PMD.pmd_it_name => data))
@@ -52,9 +52,6 @@ function parse_files(power_path::String, water_path::String, link_path::String)
 
     # Correct the network data.
     correct_network_data!(joint_network_data)
-
-    # Ensure all datasets use the same units for power.
-    resolve_units!(joint_network_data, p_per_unit, w_per_unit)
 
     # Return the network dictionary.
     return joint_network_data

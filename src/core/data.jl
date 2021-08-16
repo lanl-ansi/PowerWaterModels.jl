@@ -1,3 +1,49 @@
+function correct_network_data!(data::Dict{String, Any})
+    # Correct and prepare linking data.
+    assign_pump_loads!(data)
+
+    # Correct and prepare power network data.
+    _PMD.correct_network_data!(data; make_pu = true)
+
+    # Correct and prepare water network data.
+    _WM.correct_network_data!(data)
+
+    # Correct linking data again.
+    assign_pump_loads!(data)
+end
+
+
+function assign_pump_loads!(data::Dict{String, Any})
+    for pump_load in values(data["it"]["dep"]["pump_load"])
+        # Change the indices of the pump to match network subdataset.
+        pump_name = pump_load["pump"]["source_id"]
+        pumps = data["it"][_WM.wm_it_name]["pump"]
+        pump_name = typeof(pump_name) == String ? pump_name : string(pump_name)
+        pump = pumps[findfirst(x -> pump_name == x["source_id"][2], pumps)]
+        pump_load["pump"]["index"] = pump["index"]
+
+        # Change the indices of the load to match network subdataset.
+        load_name = pump_load["load"]["source_id"]
+        loads = data["it"][_PMD.pmd_it_name]["load"]
+        load_name = typeof(load_name) == String ? load_name : string(load_name)
+        load_key = findfirst(x -> lowercase(load_name) == x["source_id"], loads)
+        pump_load["load"]["index"] = load_key
+
+        # Check if either of the components or the dependency is inactive.
+        load_is_inactive = loads[load_key]["status"] == _PMD.DISABLED
+        pump_is_inactive = pump["status"] == _WM.STATUS_INACTIVE
+        pump_load_is_inactive = pump_load["status"] == STATUS_INACTIVE
+
+        if (load_is_inactive || pump_is_inactive) || pump_load_is_inactive
+            # If any of the above statuses are inactive, all are inactive.
+            loads[load_key]["status"] = _PMD.DISABLED
+            pump["status"] = _WM.STATUS_INACTIVE
+            pump_load["status"] = STATUS_INACTIVE
+        end
+    end
+end
+
+
 function networks_are_consistent(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any})
     return _IM.get_num_networks(p_data) == _IM.get_num_networks(w_data)
 end
