@@ -54,9 +54,9 @@ wm_path = joinpath(dirname(pathof(_WM)), "..")
 
     include("io.jl")
 
-    # include("base.jl")
+    include("data.jl")
 
-    # include("data.jl")
+    # include("base.jl")
 
     # include("objective.jl")
 

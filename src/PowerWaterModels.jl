@@ -1,10 +1,12 @@
 module PowerWaterModels
     import InfrastructureModels
     import InfrastructureModels: nw_id_default
+    import PowerModels
     import PowerModelsDistribution
     import WaterModels
 
     # Initialize shortened package names for convenience.
+    const _PM = PowerModels
     const _PMD = PowerModelsDistribution
     const _WM = WaterModels
     const _IM = InfrastructureModels

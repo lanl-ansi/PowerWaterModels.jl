@@ -13,6 +13,18 @@ function correct_network_data!(data::Dict{String, Any})
 end
 
 
+function _get_load_id_from_name(data::Dict{String,<:Any}, name::String)
+    pmd_data = _PMD.get_pmd_data(data)
+
+    if "source_type" in keys(pmd_data) && pmd_data["source_type"] == "matpower"
+        return findfirst(x -> x["source_id"][2] == parse(Int64, name), pmd_data["load"])
+    else
+        return findfirst(x -> x["source_id"] == lowercase(name), pmd_data["load"])
+    end
+end
+
+
+
 function assign_pump_loads!(data::Dict{String, Any})
     for pump_load in values(data["it"]["dep"]["pump_load"])
         # Change the indices of the pump to match network subdataset.
@@ -26,7 +38,7 @@ function assign_pump_loads!(data::Dict{String, Any})
         load_name = pump_load["load"]["source_id"]
         loads = data["it"][_PMD.pmd_it_name]["load"]
         load_name = typeof(load_name) == String ? load_name : string(load_name)
-        load_key = findfirst(x -> lowercase(load_name) == x["source_id"], loads)
+        load_key = _get_load_id_from_name(data, load_name)
         pump_load["load"]["index"] = load_key
 
         # Check if either of the components or the dependency is inactive.
@@ -45,49 +57,73 @@ end
 
 
 function networks_are_consistent(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any})
-    return _IM.get_num_networks(p_data) == _IM.get_num_networks(w_data)
+    return get_num_networks_pmd(p_data) == _IM.get_num_networks(w_data)
 end
 
 
-function make_multinetworks(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any})
+function get_num_networks_pmd(data::Dict{String,<:Any})
+    if _IM.ismultinetwork(data)
+        return length(data["nw"])
+    elseif _IM.has_time_series(data)
+        if haskey(data["time_series"], "num_steps")
+            return data["time_series"]["num_steps"]
+        else
+            first_key = collect(keys(data["time_series"]))[1]
+            return length(data["time_series"][first_key]["time"])
+        end
+    else
+        return 1
+    end
+end
+
+
+function make_multinetwork(data::Dict{String,<:Any})
+    # Parse the PowerModelsDistribution data.
+    pmd_data = _PMD.get_pmd_data(data)
+
     # If the network comes from OpenDSS data, transform to a mathematical model.
-    if !(haskey(p_data, "source_type") && p_data["source_type"] == "matpower")
-        p_data = _PMD.transform_data_model(p_data; build_multinetwork=true)
+    if !(haskey(pmd_data, "source_type") && pmd_data["source_type"] == "matpower")
+        pmd_data = _PMD.transform_data_model(pmd_data; multinetwork = true)
     end
 
-    # Check if the networks need to be translated to multinetwork.
-    translate_p = !_IM.ismultinetwork(p_data)
-    translate_w = !_IM.ismultinetwork(w_data)
+    # Get multinetwork properties of the power network.
+    translate_p = !_IM.ismultinetwork(pmd_data)
+    num_steps_p = get_num_networks_pmd(pmd_data)
 
-    # Get the maximum number of steps represented by each network.
-    num_steps_p = _IM.get_num_networks(p_data)
-    num_steps_w = _IM.get_num_networks(w_data)
+    # Get multinetwork properties of the water network.
+    wm_data = _WM.get_wm_data(data)
+    translate_w = !_IM.ismultinetwork(wm_data)
+    num_steps_w = _IM.get_num_networks(wm_data)
 
     # Depending on the number of steps present in each network, adjust the data.
     if num_steps_p == 1 && num_steps_w == 1
-        p_data_tmp = translate_p ? _replicate_power_data(p_data, 1) : p_data
-        w_data_tmp = translate_w ? _IM.replicate(w_data, 1, _WM._wm_global_keys) : w_data
+        p_data_tmp = translate_p ? _replicate_power_data(pmd_data, 1) : pmd_data
+        w_data_tmp = translate_w ? _IM.replicate(wm_data, 1, _WM._wm_global_keys) : wm_data
     elseif num_steps_p == 1 && num_steps_w > 1
-        p_data_tmp = translate_p ? _replicate_power_data(p_data, num_steps_w) : p_data
-        w_data_tmp = translate_w ? _IM.make_multinetwork(w_data, _WM._wm_global_keys) : w_data
+        p_data_tmp = translate_p ? _replicate_power_data(pmd_data, num_steps_w) : pmd_data
+        w_data_tmp = translate_w ? _IM.make_multinetwork(wm_data, _WM._wm_global_keys) : wm_data
     elseif num_steps_p > 1 && num_steps_w == 1
-        p_data_tmp = translate_p ? _make_power_multinetwork(p_data) : p_data
-        w_data_tmp = translate_w ? _IM.replicate(w_data, num_steps_p, _WM._wm_global_keys) : w_data
+        p_data_tmp = translate_p ? _make_power_multinetwork(pmd_data) : pmd_data
+        w_data_tmp = translate_w ? _WM.replicate(wm_data, num_steps_p) : wm_data
     else
-        p_data_tmp = translate_p ? _make_power_multinetwork(p_data) : p_data
-        w_data_tmp = translate_w ? _IM.make_multinetwork(w_data, _WM._wm_global_keys) : w_data
+        p_data_tmp = translate_p ? _make_power_multinetwork(pmd_data) : pmd_data
+        w_data_tmp = translate_w ? _IM.make_multinetwork(wm_data, _WM._wm_global_keys) : wm_data
     end
 
-    # Return the (potentially modified) power and water networks.
-    return p_data_tmp, w_data_tmp
+    # Store the (potentially modified) power and water networks.
+    data["it"][_PMD.pmd_it_name] = p_data_tmp
+    data["it"][_WM.wm_it_name] = w_data_tmp
+
+    # Return the modified data dictionary.
+    return data
 end
 
 
 function _make_power_multinetwork(p_data::Dict{String,<:Any})
     if haskey(p_data, "source_type") && p_data["source_type"] == "matpower"
-        return _IM.make_multinetwork(p_data, _PM._pm_global_keys)
+        return _IM.make_multinetwork(p_data, _PMD._pmd_global_keys)
     else
-        return _PMD.transform_data_model(p_data; build_multinetwork=true)
+        return _PMD.transform_data_model(p_data; multinetwork = true)
     end
 end
 

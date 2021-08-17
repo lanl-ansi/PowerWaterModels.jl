@@ -7,11 +7,17 @@
                         "source_id": "1"
                     },
                     "load": {
-                        "source_id": "Load.L3"
+                        "source_id": "3"
                     },
                     "status": 1
                 }
             }
+        },
+        "pmd": {
+            "source_type": "matpower"
+        },
+        "wm": {
+            "source_type": "epanet"
         }
     }
 }

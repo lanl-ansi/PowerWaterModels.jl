@@ -4,7 +4,7 @@
         pump_loads = data["it"]["dep"]["pump_load"]
         
         @test pump_loads["1"]["pump"]["source_id"] == "1"
-        @test pump_loads["1"]["load"]["source_id"] == "Load.L3"
+        @test pump_loads["1"]["load"]["source_id"] == "3"
         @test pump_loads["1"]["status"] == 1
     end
 
@@ -17,7 +17,7 @@
         @test data["multiinfrastructure"] == true
 
         @test pump_loads["1"]["pump"]["source_id"] == "1"
-        @test pump_loads["1"]["load"]["source_id"] == "Load.L3"
+        @test pump_loads["1"]["load"]["source_id"] == "3"
         @test pump_loads["1"]["status"] == 1
     end
 
@@ -29,8 +29,9 @@
 
 
     @testset "parse_power_file" begin
-        path = "$(pmd_path)/test/data/opendss/case3_balanced.dss"
+        path = "$(pmd_path)/test/data/matpower/case3.m"
         data = parse_power_file(path)
+
         @test haskey(data, "multiinfrastructure")
         @test data["multiinfrastructure"] == true
     end
@@ -39,13 +40,14 @@
     @testset "parse_water_file" begin
         path = "$(wm_path)/test/data/epanet/snapshot/pump-hw-lps.inp"
         data = parse_water_file(path)
+
         @test haskey(data, "multiinfrastructure")
         @test data["multiinfrastructure"] == true
     end
 
 
     @testset "parse_files" begin
-        power_path = "$(pmd_path)/test/data/opendss/case3_balanced.dss"
+        power_path = "$(pmd_path)/test/data/matpower/case3.m"
         water_path = "$(wm_path)/test/data/epanet/snapshot/pump-hw-lps.inp"
         link_path = "../test/data/json/case3-pump.json"
         data = parse_files(power_path, water_path, link_path)
