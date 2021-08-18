@@ -100,14 +100,32 @@ function make_multinetwork(data::Dict{String,<:Any})
         p_data_tmp = translate_p ? _replicate_power_data(pmd_data, 1) : pmd_data
         w_data_tmp = translate_w ? _IM.replicate(wm_data, 1, _WM._wm_global_keys) : wm_data
     elseif num_steps_p == 1 && num_steps_w > 1
-        p_data_tmp = translate_p ? _replicate_power_data(pmd_data, num_steps_w) : pmd_data
-        w_data_tmp = translate_w ? _IM.make_multinetwork(wm_data, _WM._wm_global_keys) : wm_data
+        w_data_tmp = translate_w ? _WM.make_multinetwork(wm_data) : wm_data
+
+        if translate_p
+            p_data_tmp = _replicate_power_data(pmd_data, num_steps_w)
+        else
+            if num_steps_p == num_steps_w
+                p_data_tmp = pmd_data
+            elseif num_steps_p == 1
+                # Get water and power network indices.
+                nw_id_pmd = collect(keys(pmd_data["nw"]))[1]
+                nw_ids_wm = collect(keys(w_data_tmp["nw"]))
+
+                # Assume the same power properties across all subnetworks.
+                p_data_tmp = deepcopy(pmd_data)
+                p_data_tmp["nw"] = Dict(nw => deepcopy(
+                    pmd_data["nw"][nw_id_pmd]) for nw in nw_ids_wm)
+            else
+                Memento.error(_LOGGER, "Multinetworks cannot be reconciled.")
+            end
+        end
     elseif num_steps_p > 1 && num_steps_w == 1
         p_data_tmp = translate_p ? _make_power_multinetwork(pmd_data) : pmd_data
         w_data_tmp = translate_w ? _WM.replicate(wm_data, num_steps_p) : wm_data
     else
         p_data_tmp = translate_p ? _make_power_multinetwork(pmd_data) : pmd_data
-        w_data_tmp = translate_w ? _IM.make_multinetwork(wm_data, _WM._wm_global_keys) : wm_data
+        w_data_tmp = translate_w ? _WM.make_multinetwork(wm_data) : wm_data
     end
 
     # Store the (potentially modified) power and water networks.
