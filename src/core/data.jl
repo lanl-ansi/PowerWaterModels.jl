@@ -139,7 +139,7 @@ end
 
 function _make_power_multinetwork(p_data::Dict{String,<:Any})
     if haskey(p_data, "source_type") && p_data["source_type"] == "matpower"
-        return _IM.make_multinetwork(p_data, _PMD._pmd_global_keys)
+        return _IM.make_multinetwork(p_data, _PMD.pmd_it_name, _PMD._pmd_global_keys)
     else
         return _PMD.transform_data_model(p_data; multinetwork = true)
     end
@@ -172,7 +172,11 @@ function _get_load_from_name(name::String, p_data::Dict{String,<:Any})
 end
 
 
-function _modify_loads(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_data::Dict{String,<:Any})
+function _modify_loads(data::Dict{String,<:Any})
+    # Get the separated power and water subdatasets.
+    p_data = data["it"][_PMD.pmd_it_name]
+    w_data = data["it"][_WM.wm_it_name]
+
     # Ensure the two networks have the same multinetwork keys.
     if keys(p_data["nw"]) != keys(w_data["nw"])
         Memento.error(_LOGGER, "Multinetworks do not have the same indices.")
@@ -180,7 +184,7 @@ function _modify_loads(p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, p
 
     for nw in keys(p_data["nw"]) # Loop over all subnetworks.
         # Where pumps are linked to power network components, change the loads.
-        for link in pw_data["power_water_links"]
+        for (k, pump_load) in data["it"]["dep"]["pump_load"]
             # Estimate maximum pump power in units used by the power network.
             base_power = 1.0e-6 * inv(p_data["nw"][nw]["baseMVA"])
             pump = _get_pump_from_name(link["pump_source_id"], w_data["nw"][nw])

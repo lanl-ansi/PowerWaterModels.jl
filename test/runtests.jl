@@ -2,6 +2,7 @@ using PowerWaterModels
 
 # Initialize shortened package names for convenience.
 const _IM = PowerWaterModels._IM
+const _PM = PowerWaterModels._PM
 const _PMD = PowerWaterModels._PMD
 const _WM = PowerWaterModels._WM
 
