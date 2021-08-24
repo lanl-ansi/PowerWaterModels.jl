@@ -26,7 +26,7 @@ function parse_power_file(file_path::String; skip_correct::Bool = true)
         _PMD.make_multiconductor!(data, real(3))
     else
         # TODO: What should `skip_correct` do, here, if anything?
-        data = _PMD.parse_file(file_path)
+        data = _PMD.parse_file(file_path; data_model = _PMD.MATHEMATICAL)
     end
 
     return _IM.ismultiinfrastructure(data) ? data :
@@ -61,5 +61,5 @@ function parse_files(power_path::String, water_path::String, link_path::String)
     correct_network_data!(joint_network_data)
 
     # Return the network dictionary.
-    return joint_network_data
+    return make_multinetwork(joint_network_data)
 end

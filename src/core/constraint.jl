@@ -3,9 +3,9 @@ function constraint_fixed_load(pm::_PMD.AbstractUnbalancedPowerModel, i::Int64; 
 end
 
 
-function constraint_pump_load(pm::_PMD.AbstractUnbalancedPowerModel, wm::_WM.AbstractWaterModel, i::Int, a::Int; nw::Int=wm.cnw)
-    power_load = _get_power_load_expression(pm, i, nw=nw)
-    pump_load = _get_pump_load_expression(pm, wm, a, nw=nw)
+function constraint_pump_load(pwm::AbstractPowerWaterModel, i::Int, a::Int; nw::Int=wm.cnw)
+    power_load = _get_power_load_expression(pwm, i, nw=nw)
+    pump_load = _get_pump_load_expression(pwm, a, nw=nw)
     c = JuMP.@constraint(pm.model, pump_load == power_load)
 end
 

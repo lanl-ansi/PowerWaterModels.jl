@@ -1,6 +1,6 @@
 module PowerWaterModels
     import InfrastructureModels
-    import InfrastructureModels: nw_id_default
+    import InfrastructureModels: optimize_model!, @im_fields, ismultinetwork, nw_id_default
     import PowerModels
     import PowerModelsDistribution
     import WaterModels
@@ -44,15 +44,16 @@ module PowerWaterModels
     include("io/json.jl")
     include("io/common.jl")
 
+    include("core/base.jl")
     include("core/constants.jl")
     include("core/data.jl")
-    # include("core/base.jl")
-    # include("core/constraint.jl")
-    # include("core/objective.jl")
-    # include("core/types.jl")
+    include("core/helpers.jl")
+    include("core/constraint.jl")
+    include("core/objective.jl")
+    include("core/types.jl")
 
-    # include("prob/pwf.jl")
-    # include("prob/opwf.jl")
+    include("prob/pwf.jl")
+    include("prob/opwf.jl")
 
     # This must come last to support automated export.
     include("core/export.jl")

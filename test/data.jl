@@ -65,8 +65,10 @@ end
         p_data = _PM.parse_file("$(pmd_path)/test/data/matpower/case3.m")
         p_data["time_series"] = Dict{String,Any}("num_steps" => 3)
         p_data = PowerWaterModels._make_power_multinetwork(p_data)
+        @test length(p_data["nw"]) == 3
 
         p_data = _PMD.parse_file("$(pmd_path)/test/data/opendss/case2_diag.dss")
         p_data = PowerWaterModels._make_power_multinetwork(p_data)
+        @test length(p_data["nw"]) == 1
     end
 end

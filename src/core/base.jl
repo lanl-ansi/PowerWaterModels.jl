@@ -17,6 +17,10 @@ function instantiate_model(
     build_method::Function;
     kwargs...,
 )
+    if !networks_are_consistent(data["it"][_PMD.pmd_it_name], data["it"][_WM.wm_it_name])
+        Memento.error(_LOGGER, "Multinetworks are not of the same length.")
+    end
+
     return _IM.instantiate_model(
         data,
         model_type,
@@ -152,8 +156,8 @@ end
 
 
 function ref_add_core!(ref::Dict{Symbol,<:Any})
-    # Populate the PowerModels portion of the `ref` dictionary.
-    _PMD._ref_add_core!(ref)
+    # Populate the PowerModelsDistribution portion of the `ref` dictionary.
+    _PMD.ref_add_core!(ref)
 
     # Populate the WaterModels portion of the `ref` dictionary.
     _WM.ref_add_core!(ref)
