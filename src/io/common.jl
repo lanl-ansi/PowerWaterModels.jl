@@ -21,16 +21,16 @@ end
 
 function parse_power_file(file_path::String; skip_correct::Bool = true)
     if split(file_path, ".")[end] == "m" # If reading a MATPOWER file.
-        data = _PM.parse_file(file_path; validate = !skip_correct)
-        _scale_loads!(data, 1.0 / 3.0)
-        _PMD.make_multiconductor!(data, real(3))
+        data = _PM.parse_file(file_path)#; validate = !skip_correct)
+        # _scale_loads!(data, 1.0 / 3.0)
+        _PMD.make_multiconductor!(data, 3)
     else
         # TODO: What should `skip_correct` do, here, if anything?
-        data = _PMD.parse_file(file_path; data_model = _PMD.MATHEMATICAL)
+        data = _PMD.parse_file(file_path)
     end
 
     return _IM.ismultiinfrastructure(data) ? data :
-           Dict("multiinfrastructure" => true, "it" => Dict(_PMD.pmd_it_name => data))
+          Dict("multiinfrastructure" => true, "it" => Dict(_PMD.pmd_it_name => data))
 end
 
 
@@ -52,14 +52,18 @@ function parse_files(power_path::String, water_path::String, link_path::String)
     joint_network_data = parse_link_file(link_path)
     _IM.update_data!(joint_network_data, parse_power_file(power_path))
     _IM.update_data!(joint_network_data, parse_water_file(water_path))
+    correct_network_data!(joint_network_data)
 
     # Store whether or not each network uses per-unit data.
     p_per_unit = get(joint_network_data["it"][_PMD.pmd_it_name], "per_unit", false)
     w_per_unit = get(joint_network_data["it"][_WM.wm_it_name], "per_unit", false)
 
-    # Correct the network data.
-    correct_network_data!(joint_network_data)
+    # Make the power and water data sets multinetwork.
+    joint_network_data_mn = make_multinetwork(joint_network_data)    
+
+    # Prepare and correct pump load linking data.
+    assign_pump_loads!(joint_network_data_mn)
 
     # Return the network dictionary.
-    return make_multinetwork(joint_network_data)
+    return joint_network_data_mn
 end

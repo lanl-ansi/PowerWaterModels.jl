@@ -9,7 +9,7 @@
         pwm = instantiate_model(data, pwm_type, build_opwf)
         objective_min_max_generation_fluctuation(pwm)
 
-        result = _IM.optimize_model!(pwm, optimizer = juniper)
+        result = _IM.optimize_model!(pwm, optimizer = ipopt; relax_integrality = true)
         @test result["termination_status"] == LOCALLY_SOLVED
     end
 end

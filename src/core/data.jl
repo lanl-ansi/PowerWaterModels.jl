@@ -1,44 +1,58 @@
 function correct_network_data!(data::Dict{String, Any})
-    # Correct and prepare linking data.
-    assign_pump_loads!(data)
-
     # Correct and prepare power network data.
     _PMD.correct_network_data!(data; make_pu = true)
 
     # Correct and prepare water network data.
     _WM.correct_network_data!(data)
-
-    # Correct linking data again.
-    assign_pump_loads!(data)
 end
 
 
-function _get_load_id_from_name(data::Dict{String,<:Any}, name::String)
+function _get_load_id_from_name(data::Dict{String,<:Any}, name::String, power_source_type::String; nw::String = _PMD.nw_id_default)
     pmd_data = _PMD.get_pmd_data(data)
 
-    if "source_type" in keys(pmd_data) && pmd_data["source_type"] == "matpower"
-        return findfirst(x -> x["source_id"][2] == parse(Int64, name), pmd_data["load"])
+    if power_source_type == "matpower"
+        return findfirst(x -> x["source_id"][2] == parse(Int64, name), pmd_data["nw"][nw]["load"])
     else
-        return findfirst(x -> x["source_id"] == lowercase(name), pmd_data["load"])
+        return findfirst(x -> x["source_id"] == lowercase(name), pmd_data["nw"][nw]["load"])
     end
 end
 
 
-
 function assign_pump_loads!(data::Dict{String, Any})
-    for pump_load in values(data["it"]["dep"]["pump_load"])
+    # Ensure power and water network multinetworks are consistent.
+    if !networks_are_consistent(data["it"][_PMD.pmd_it_name], data["it"][_WM.wm_it_name])
+        Memento.error(_LOGGER, "Multinetworks cannot be reconciled.")
+    end
+
+    # Ensure the multinetwork indices are the same across power and water data sets.
+    nw_ids_pmd = sort(collect(keys(data["it"][_PMD.pmd_it_name]["nw"])))
+    nw_ids_wm = sort(collect(keys(data["it"][_WM.wm_it_name]["nw"])))
+    @assert nw_ids_pmd == nw_ids_wm
+    
+    # Ensure the power source data type has been specified.
+    @assert haskey(data["it"][_PMD.pmd_it_name], "source_type")
+    power_source_type = data["it"][_PMD.pmd_it_name]["source_type"]
+
+    for nw in nw_ids_pmd
+        # Assign the pump loads at every multinetwork index.
+        _assign_pump_loads!(data, power_source_type, nw)
+    end
+end
+
+function _assign_pump_loads!(data::Dict{String, Any}, power_source_type::String, nw::String)
+    for pump_load in values(data["it"]["dep"]["nw"][nw]["pump_load"])
         # Change the indices of the pump to match network subdataset.
         pump_name = pump_load["pump"]["source_id"]
-        pumps = data["it"][_WM.wm_it_name]["pump"]
+        pumps = data["it"][_WM.wm_it_name]["nw"][nw]["pump"]
         pump_name = typeof(pump_name) == String ? pump_name : string(pump_name)
         pump = pumps[findfirst(x -> pump_name == x["source_id"][2], pumps)]
         pump_load["pump"]["index"] = pump["index"]
 
         # Change the indices of the load to match network subdataset.
         load_name = pump_load["load"]["source_id"]
-        loads = data["it"][_PMD.pmd_it_name]["load"]
+        loads = data["it"][_PMD.pmd_it_name]["nw"][nw]["load"]
         load_name = typeof(load_name) == String ? load_name : string(load_name)
-        load_key = _get_load_id_from_name(data, load_name)
+        load_key = _get_load_id_from_name(data, load_name, power_source_type; nw = nw)
         pump_load["load"]["index"] = load_key
 
         # Check if either of the components or the dependency is inactive.
@@ -80,7 +94,8 @@ end
 function make_multinetwork(data::Dict{String,<:Any})
     # Parse the PowerModelsDistribution data.
     pmd_data = _PMD.get_pmd_data(data)
-
+    pmd_source_type = pmd_data["source_type"]
+ 
     # If the network comes from OpenDSS data, transform to a mathematical model.
     if !(haskey(pmd_data, "source_type") && pmd_data["source_type"] == "matpower")
         pmd_data = _PMD.transform_data_model(pmd_data; multinetwork = true)
@@ -99,6 +114,11 @@ function make_multinetwork(data::Dict{String,<:Any})
     if num_steps_p == 1 && num_steps_w == 1
         p_data_tmp = translate_p ? _replicate_power_data(pmd_data, 1) : pmd_data
         w_data_tmp = translate_w ? _IM.replicate(wm_data, 1, _WM._wm_global_keys) : wm_data
+
+        # Ensure consistency of the multinetwork keys.
+        p_nw = collect(keys(p_data_tmp["nw"]))[1]
+        w_nw = collect(keys(w_data_tmp["nw"]))[1]
+        p_data_tmp["nw"][w_nw] = pop!(p_data_tmp["nw"], p_nw)
     elseif num_steps_p == 1 && num_steps_w > 1
         w_data_tmp = translate_w ? _WM.make_multinetwork(wm_data) : wm_data
 
@@ -129,8 +149,15 @@ function make_multinetwork(data::Dict{String,<:Any})
     end
 
     # Store the (potentially modified) power and water networks.
+    p_data_tmp["source_type"] = pmd_source_type
     data["it"][_PMD.pmd_it_name] = p_data_tmp
     data["it"][_WM.wm_it_name] = w_data_tmp
+
+    # Replicate the dependency dictionary, if necessary.
+    if !_IM.ismultinetwork(data["it"]["dep"])
+        num_steps = get_num_networks_pmd(p_data_tmp)
+        data["it"]["dep"] = _IM.replicate(data["it"]["dep"], num_steps, Set{String}())
+    end
 
     # Return the modified data dictionary.
     return data
@@ -146,12 +173,9 @@ function _make_power_multinetwork(p_data::Dict{String,<:Any})
 end
 
 
-function _replicate_power_data(p_data::Dict{String,<:Any}, num_networks::Int64)
-    if haskey(p_data, "source_type") && p_data["source_type"] == "matpower"
-        return _IM.replicate(p_data, num_networks, _PM._pm_global_keys)
-    else
-        return _IM.replicate(p_data, num_networks, _PMD._pmd_math_global_keys)
-    end
+function _replicate_power_data(data::Dict{String,<:Any}, num_networks::Int64)
+    pmd_data = _PMD.get_pmd_data(data)
+    return _IM.replicate(pmd_data, num_networks, _PMD._pmd_math_global_keys)
 end
 
 
@@ -176,11 +200,6 @@ function _modify_loads(data::Dict{String,<:Any})
     # Get the separated power and water subdatasets.
     p_data = data["it"][_PMD.pmd_it_name]
     w_data = data["it"][_WM.wm_it_name]
-
-    # Ensure the two networks have the same multinetwork keys.
-    if keys(p_data["nw"]) != keys(w_data["nw"])
-        Memento.error(_LOGGER, "Multinetworks do not have the same indices.")
-    end
 
     for nw in keys(p_data["nw"]) # Loop over all subnetworks.
         # Where pumps are linked to power network components, change the loads.

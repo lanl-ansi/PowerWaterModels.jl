@@ -50,15 +50,7 @@ end
         power_path = "$(pmd_path)/test/data/opendss/case3_balanced.dss"
         water_path = "$(wm_path)/test/data/epanet/multinetwork/pump-hw-lps.inp"
         link_path = "../test/data/json/case3-pump-dss.json"
-        @test !consistent_multinetworks(power_path, water_path, link_path)
-    end
-
-    @testset "_modify_loads" begin
-        power_path = "$(pmd_path)/test/data/opendss/case3_balanced.dss"
-        water_path = "$(wm_path)/test/data/epanet/multinetwork/pump-hw-lps.inp"
-        link_path = "../test/data/json/case3-pump-dss.json"
-        mn_data = make_multinetwork(parse_files(power_path, water_path, link_path))
-        @test_throws ErrorException PowerWaterModels._modify_loads(mn_data)
+        @test_throws ErrorException parse_files(power_path, water_path, link_path)
     end
 
     @testset "_make_power_multinetwork" begin
