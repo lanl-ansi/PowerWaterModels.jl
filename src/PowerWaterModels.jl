@@ -52,6 +52,7 @@ module PowerWaterModels
     include("core/objective.jl")
     include("core/types.jl")
 
+    include("prob/linking.jl")
     include("prob/pwf.jl")
     include("prob/opwf.jl")
 
