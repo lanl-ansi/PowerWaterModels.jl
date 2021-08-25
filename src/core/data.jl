@@ -53,7 +53,7 @@ function _assign_pump_loads!(data::Dict{String, Any}, power_source_type::String,
         loads = data["it"][_PMD.pmd_it_name]["nw"][nw]["load"]
         load_name = typeof(load_name) == String ? load_name : string(load_name)
         load_key = _get_load_id_from_name(data, load_name, power_source_type; nw = nw)
-        pump_load["load"]["index"] = load_key
+        pump_load["load"]["index"] = parse(Int, load_key)
 
         # Check if either of the components or the dependency is inactive.
         load_is_inactive = loads[load_key]["status"] == _PMD.DISABLED

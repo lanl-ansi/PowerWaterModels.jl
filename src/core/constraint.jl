@@ -1,23 +1,27 @@
-function constraint_fixed_load(pm::_PMD.AbstractUnbalancedPowerModel, i::Int64; nw::Int=pm.cnw)
-    JuMP.@constraint(pm.model, _PMD.var(pm, nw, :z_demand, i) == 1.0)
+function constraint_fixed_load(pwm::AbstractPowerWaterModel, i::Int64; nw::Int = _IM.nw_id_default)
+    pmd = _get_powermodel_from_powerwatermodel(pwm)
+    z = _PMD.var(pmd, nw, :z_demand, i)
+    JuMP.@constraint(pmd.model, z == 1.0)
 end
 
 
-function constraint_pump_load(pwm::AbstractPowerWaterModel, i::Int, a::Int; nw::Int=wm.cnw)
-    power_load = _get_power_load_expression(pwm, i, nw=nw)
-    pump_load = _get_pump_load_expression(pwm, a, nw=nw)
-    c = JuMP.@constraint(pm.model, pump_load == power_load)
+function constraint_pump_load(pwm::AbstractPowerWaterModel, i::Int, a::Int; nw::Int = _IM.nw_id_default)
+    power_load = _get_power_load_expression(pwm, i, nw = nw)
+    pump_load = _get_pump_load_expression(pwm, a, nw = nw)
+    # TODO: Include a conversion factor using per-unit transformations.
+    JuMP.@constraint(pwm.model, pump_load == power_load)
 end
 
 
-function _get_power_load_expression(pm::_PMD.AbstractUnbalancedPowerModel, i::Int; nw::Int=pm.cnw)
-    pd = sum(_PM.ref(pm, nw, :load, i)["pd"])
-    z = _PM.var(pm, nw, :z_demand, i)
-    return JuMP.@expression(pm.model, pd * z)
+function _get_power_load_expression(pwm::AbstractPowerWaterModel, i::Int; nw::Int = _IM.nw_id_default)
+    pmd = _get_powermodel_from_powerwatermodel(pwm)
+    pd = sum(_PMD.ref(pmd, nw, :load, i)["pd"])
+    z = _PMD.var(pmd, nw, :z_demand, i)
+    return JuMP.@expression(pmd.model, pd * z)
 end
 
 
-function _get_pump_load_expression(pm::_PMD.AbstractUnbalancedPowerModel, wm::_WM.AbstractWaterModel, a::Int; nw::Int=pm.cnw)
-    scaling = 1.0e-6 * inv(_PM.ref(pm, nw, :baseMVA)) # Scaling factor for power.
-    return JuMP.@expression(wm.model, scaling * _WM.var(wm, nw, :P_pump, a))
+function _get_pump_load_expression(pwm::AbstractPowerWaterModel, i::Int; nw::Int = _IM.nw_id_default)
+    wm = _get_watermodel_from_powerwatermodel(pwm)
+    return _WM.var(wm, nw, :P_pump, i)
 end
