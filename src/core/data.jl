@@ -179,56 +179,77 @@ function _replicate_power_data(data::Dict{String,<:Any}, num_networks::Int64)
 end
 
 
-function _get_pump_from_name(name::String, w_data::Dict{String,<:Any})
-    pump_id = findfirst(x -> x["source_id"][2] == name, w_data["pump"])
-    return w_data["pump"][pump_id]
-end
-
-
-function _get_load_from_name(name::String, p_data::Dict{String,<:Any})
-    if "source_type" in keys(p_data) && p_data["source_type"] == "matpower"
-        load_id = findfirst(x -> x["source_id"][2] == parse(Int64, name), p_data["load"])
-    else
-        load_id = findfirst(x -> x["source_id"] == lowercase(name), p_data["load"])
-    end
-
-    return p_data["load"][load_id]
-end
-
-
-function _modify_loads(data::Dict{String,<:Any})
+function _modify_loads!(data::Dict{String,<:Any})
     # Get the separated power and water subdatasets.
     p_data = data["it"][_PMD.pmd_it_name]
     w_data = data["it"][_WM.wm_it_name]
 
-    for nw in keys(p_data["nw"]) # Loop over all subnetworks.
+    # Ensure the multinetwork indices are the same across power and water data sets.
+    nw_ids_pmd = sort([parse(Int, x) for x in collect(keys(p_data["nw"]))])
+    nw_ids_wm = sort([parse(Int, x) for x in collect(keys(w_data["nw"]))])
+    nw_ids_inner = length(nw_ids_wm) > 1 ? nw_ids_wm[1:end-1] : nw_ids_wm
+    @assert nw_ids_pmd == nw_ids_wm
+
+    # Get important scaling data.
+    base_mass = get(w_data, "base_mass", 1.0)
+    base_length = get(w_data, "base_length", 1.0)
+    base_time = get(w_data, "base_time", 1.0)
+
+    rho_s = _WM._calc_scaled_density(base_mass, base_length)
+    g_s = _WM._calc_scaled_gravity(base_length, base_time)
+
+    for nw in nw_ids_inner # Loop over all subnetworks.
         # Where pumps are linked to power network components, change the loads.
-        for (k, pump_load) in data["it"]["dep"]["pump_load"]
-            # Estimate maximum pump power in units used by the power network.
-            base_power = 1.0e-6 * inv(p_data["nw"][nw]["baseMVA"])
-            pump = _get_pump_from_name(link["pump_source_id"], w_data["nw"][nw])
-            node_fr = w_data["nw"][nw]["node"][string(pump["node_fr"])]
-            node_to = w_data["nw"][nw]["node"][string(pump["node_to"])]
-            max_pump_power = base_power * _WM._calc_pump_power_max(pump, node_fr, node_to)
+        factor = _get_power_conversion_factor(data, string(nw))
+
+        for pump_load in values(data["it"]["dep"]["nw"][string(nw)]["pump_load"])
+            # Obtain maximum pump power in units used by the water network.
+            pump = w_data["nw"][string(nw)]["pump"][string(pump_load["pump"]["index"])]
+            node_fr = w_data["nw"][string(nw)]["node"][string(pump["node_fr"])]
+            node_to = w_data["nw"][string(nw)]["node"][string(pump["node_to"])]
+            P_max = _WM._calc_pump_power_max(pump, node_fr, node_to, rho_s, g_s)
 
             # Change the loads associated with pumps.
-            load = _get_load_from_name(link["load_source_id"], p_data["nw"][nw])
-            load_power = inv(sum(x -> x > 0.0, load["pd"])) * max_pump_power
+            load = p_data["nw"][string(nw)]["load"][string(pump_load["load"]["index"])]
+            load_power = inv(sum(x -> x > 0.0, load["pd"])) * factor * P_max
             load["pd"][load["pd"] .> 0.0] .= load_power
             load["qd"][load["qd"] .> 0.0] .= 0.0 # Assume no reactive load.
-
-            # Add an index variable for the pump within the load object.
-            load["pump_id"] = pump["index"]
         end
     end
-
-    # Return the modified power network data.
-    return p_data
 end
 
 
 function _scale_loads!(p_data::Dict{String,<:Any}, scalar::Float64)
-    for (i, load) in p_data["load"]
+    for load in values(p_data["load"])
         load["pd"] *= scalar
     end
+end
+
+
+function _get_power_conversion_factor(data::Dict{String,<:Any}, nw::String)::Float64
+    # Get the conversion factor for power used by the power network.
+    data_pmd = _PMD.get_pmd_data(data)
+
+    if haskey(data_pmd["nw"][string(nw)], "baseMVA")
+        base_mva_pmd = data_pmd["nw"][string(nw)]["baseMVA"]
+    else
+        sbase = data_pmd["nw"][string(nw)]["settings"]["sbase"]
+        psf = data_pmd["nw"][string(nw)]["settings"]["power_scale_factor"]
+        base_mva_pmd = sbase / psf
+    end
+
+    # Watts per PowerModelsDistribution power unit.
+    base_power_pmd = 1.0e6 * base_mva_pmd 
+    
+    # Get the conversion factor for power used by the water network.
+    data_wm = _WM.get_wm_data(data)
+    transform_mass = _WM._calc_mass_per_unit_transform(data_wm)
+    transform_time = _WM._calc_time_per_unit_transform(data_wm)
+    transform_length = _WM._calc_length_per_unit_transform(data_wm)
+
+    # Scalar for WaterModels power units per Watt.
+    scalar_power_wm = transform_mass(1.0) * transform_length(1.0)^2 / transform_time(1.0)^3
+
+    # Return the power conversion factor for pumps.
+    return (1.0 / scalar_power_wm) / base_power_pmd
 end

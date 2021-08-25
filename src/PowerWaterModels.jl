@@ -45,7 +45,6 @@ module PowerWaterModels
     include("io/common.jl")
 
     include("core/base.jl")
-    include("core/ref.jl")
     include("core/constants.jl")
     include("core/data.jl")
     include("core/helpers.jl")

@@ -19,13 +19,12 @@ function parse_link_file(path::String)
 end
 
 
-function parse_power_file(file_path::String; skip_correct::Bool = true)
+function parse_power_file(file_path::String)
     if split(file_path, ".")[end] == "m" # If reading a MATPOWER file.
-        data = _PM.parse_file(file_path)#; validate = !skip_correct)
+        data = _PM.parse_file(file_path)
         _scale_loads!(data, 1.0 / 3.0)
         _PMD.make_multiconductor!(data, 3)
     else
-        # TODO: What should `skip_correct` do, here, if anything?
         data = _PMD.parse_file(file_path)
     end
 
@@ -59,10 +58,13 @@ function parse_files(power_path::String, water_path::String, link_path::String)
     w_per_unit = get(joint_network_data["it"][_WM.wm_it_name], "per_unit", false)
 
     # Make the power and water data sets multinetwork.
-    joint_network_data_mn = make_multinetwork(joint_network_data)    
+    joint_network_data_mn = make_multinetwork(joint_network_data)
 
     # Prepare and correct pump load linking data.
     assign_pump_loads!(joint_network_data_mn)
+
+    # Modify variable load properties in the power network.
+    _modify_loads!(joint_network_data_mn)
 
     # Return the network dictionary.
     return joint_network_data_mn
