@@ -8,8 +8,8 @@ end
 function constraint_pump_load(pwm::AbstractPowerWaterModel, i::Int, a::Int; nw::Int = _IM.nw_id_default)
     power_load = _get_power_load_expression(pwm, i, nw = nw)
     pump_load = _get_pump_load_expression(pwm, a, nw = nw)
-    # TODO: Include a conversion factor using per-unit transformations.
-    JuMP.@constraint(pwm.model, pump_load == power_load)
+    factor = _get_power_conversion_factor(pwm; nw = nw)
+    JuMP.@constraint(pwm.model, factor * pump_load == power_load)
 end
 
 
