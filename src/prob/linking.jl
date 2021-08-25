@@ -1,10 +1,8 @@
 function build_linking(pwm::AbstractPowerWaterModel)
     # Get important data that will be used in the modeling loop.
     pmd = _get_powermodel_from_powerwatermodel(pwm)
-    nw_ids = sort(collect(_IM.nw_ids(pwm, :dep)))
-    nw_ids_inner = length(nw_ids) > 1 ? nw_ids[1:end-1] : nw_ids
 
-    for nw in nw_ids_inner
+    for nw in _IM.nw_ids(pwm, :dep)
         # Obtain all pump loads at multinetwork index.
         pump_loads = _IM.ref(pwm, :dep, nw, :pump_load)
         
