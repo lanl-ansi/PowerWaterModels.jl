@@ -44,12 +44,13 @@ After installation of the required solvers, an example optimal power-water flow 
 ```julia
 using JuMP, Juniper, Ipopt, Cbc
 using PowerWaterModels
+const WM = PowerWaterModels.WaterModels
 
 # Set up the optimization solvers.
-ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0, "sb"=>"yes")
-cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, "logLevel"=>0)
+ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0, "sb" => "yes")
+cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, "logLevel" => 0)
 juniper = JuMP.optimizer_with_attributes(
-    Juniper.Optimizer, "nl_solver"=>ipopt, "mip_solver"=>cbc,
+    Juniper.Optimizer, "nl_solver" => ipopt, "mip_solver" => cbc,
     "branch_strategy" => :MostInfeasible, "time_limit" => 60.0)
 
 # Specify paths to the power, water, and power-water linking files.
@@ -57,14 +58,21 @@ p_file = "examples/data/opendss/IEEE13_CDPSM.dss" # Power network.
 w_file = "examples/data/epanet/cohen-short.inp" # Water network.
 pw_file = "examples/data/json/zamzam.json" # Power-water linking.
 
-# Specify the power and water formulation types separately.
-p_type, w_type = LinDist3FlowPowerModel, PWLRDWaterModel
+# Parse the input files as a multi-infrastructure data object.
+data = parse_files(p_file, w_file, pw_file)
 
-# Specify the number of breakpoints used in the linearized water formulation.
-wm_ext = Dict{Symbol,Any}(:pipe_breakpoints=>2, :pump_breakpoints=>3)
+# Perform OBBT on water network to improve variable bounds.
+WM.solve_obbt_owf!(data, ipopt; use_relaxed_network = false,
+    model_type = WM.CRDWaterModel, max_iter = 3)
+
+# Use WaterModels to set the partitioning of flows in the water network.
+WM.set_flow_partitions_num!(data, 5)
+
+# Specify the power and water formulation types separately.
+pwm_type = PowerWaterModel{LinDist3FlowPowerModel, PWLRDWaterModel}
 
 # Solve the joint optimal power-water flow problem and store the result.
-result = run_opwf(p_file, w_file, pw_file, p_type, w_type, juniper; wm_ext=wm_ext)
+result = run_opwf(data, pwm_type, juniper)
 ```
 
 ### (Optional) Solving the Problem with Gurobi
@@ -75,8 +83,8 @@ The problem considered above can then be solved using Gurobi (instead of Juniper
 import Gurobi
 
 # Solve the joint optimal power-water flow problem and store its result.
-gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "NonConvex"=>2)
-result_grb = run_opwf(p_file, w_file, pw_file, p_type, w_type, gurobi; wm_ext=wm_ext)
+gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "NonConvex" => 2)
+result_grb = run_opwf(data, pwm_type, gurobi)
 ```
 
 First, note that Gurobi solves the problem much more quickly than Juniper.
@@ -91,7 +99,7 @@ The objective value obtained via Gurobi is _smaller_ than the one obtained via J
 The `run` commands in PowerWaterModels return detailed results data in the form of a Julia `Dict`.
 This dictionary can be saved for further processing as follows:
 ```julia
-result = run_opwf(p_file, w_file, pw_file, p_type, w_type, juniper; wm_ext=wm_ext)
+result = run_opwf(data, pwm_type, juniper)
 ```
 
 For example, the algorithm's runtime and final objective value can be accessed with
@@ -103,7 +111,7 @@ result["objective"] # Final objective value (in units of the objective).
 The `"solution"` field contains detailed information about the solution produced by the `run` method.
 For example, the following can be used to inspect the temporal variation in the volume of tank 1 in the water distribution network:
 ```
-tank_1_volume = Dict(nw=>data["tank"]["10"]["V"] for (nw, data) in result["solution"]["nw"])
+tank_1_volume = Dict(nw=>data["tank"]["10"]["V"] for (nw, data) in result["solution"]["it"]["wm"]["nw"])
 ```
 
 For more information about PowerWaterModels result data, see the [PowerWaterModels Result Data Format](@ref) section.
@@ -111,30 +119,13 @@ For more information about PowerWaterModels result data, see the [PowerWaterMode
 ## Modifying Network Data
 The following example demonstrates one way to perform PowerWaterModels solves while modifying network data.
 ```julia
-p_data, w_data, pw_data = parse_files(p_file, w_file, pw_file)
-
-for (nw, network) in w_data["nw"]
-    network["demand"]["3"]["flow_nominal"] *= 0.1
-    network["demand"]["4"]["flow_nominal"] *= 0.1
-    network["demand"]["5"]["flow_nominal"] *= 0.1
+for (nw, network) in data["it"]["wm"]["nw"]
+    network["demand"]["3"]["flow_nominal"] *= 0.90
+    network["demand"]["4"]["flow_nominal"] *= 0.90
+    network["demand"]["5"]["flow_nominal"] *= 0.90
 end
 
-result_mod = run_opwf(p_data, w_data, pw_data, p_type, w_type, juniper; wm_ext=wm_ext)
+result_mod = run_opwf(data, pwm_type, juniper)
 ```
 Note that the smaller demands in the modified problem result in an overall smaller objective value.
 For additional details about the network data, see the [PowerWaterModels Network Data Format](@ref) section.
-
-## Alternate Methods for Building and Solving Models
-The following example demonstrates how to break a `run_opwf` call into separate model building and solving steps.
-This allows inspection of the JuMP model created by PowerWaterModels for the problem.
-```julia
-# Instantiate the joint power-water models.
-pm, wm = instantiate_model(p_data, w_data, pw_data, p_type, w_type, build_opwf; wm_ext=wm_ext)
-
-# Print the (shared) JuMP model.
-print(pm.model)
-
-# Create separate power and water result dictionaries.
-power_result = PowerWaterModels._IM.optimize_model!(pm, optimizer=juniper)
-water_result = PowerWaterModels._IM.build_result(wm, power_result["solve_time"])
-```

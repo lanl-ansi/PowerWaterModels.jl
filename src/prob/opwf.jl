@@ -7,6 +7,12 @@ function run_opwf(p_file, w_file, pw_file, pwm_type, optimizer; kwargs...)
 end
 
 
+"Entry point for running the optimal power-water flow problem."
+function run_opwf(data, pwm_type, optimizer; kwargs...)
+    return run_model(data, pwm_type, optimizer, build_opwf; kwargs...)
+end
+
+
 "Construct the optimal power-water flow problem."
 function build_opwf(pwm::AbstractPowerWaterModel)
     # Power-only related variables and constraints.
