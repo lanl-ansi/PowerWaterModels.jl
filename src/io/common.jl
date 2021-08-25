@@ -22,7 +22,7 @@ end
 function parse_power_file(file_path::String; skip_correct::Bool = true)
     if split(file_path, ".")[end] == "m" # If reading a MATPOWER file.
         data = _PM.parse_file(file_path)#; validate = !skip_correct)
-        # _scale_loads!(data, 1.0 / 3.0)
+        _scale_loads!(data, 1.0 / 3.0)
         _PMD.make_multiconductor!(data, 3)
     else
         # TODO: What should `skip_correct` do, here, if anything?
