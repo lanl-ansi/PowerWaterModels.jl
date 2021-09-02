@@ -2,7 +2,7 @@ name = "PowerWaterModels"
 uuid = "7f4f7f52-2f44-4c87-b9ed-462dc784f1b2"
 authors = ["Byron Tasseff"]
 repo = "https://github.com/lanl-ansi/PowerWaterModels.jl"
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 InfrastructureModels = "2030c09a-7f63-5d83-885d-db604e0e9cc0"
@@ -14,7 +14,7 @@ WaterModels = "7c60b362-08f4-5b14-8680-cd67a3e18348"
 InfrastructureModels = "~0.6"
 PowerModels = "~0.18"
 PowerModelsDistribution = "~0.11"
-WaterModels = "~0.7"
+WaterModels = "~0.8"
 julia = "^1"
 
 [extras]
