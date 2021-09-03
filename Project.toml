@@ -1,6 +1,6 @@
 name = "PowerWaterModels"
 uuid = "7f4f7f52-2f44-4c87-b9ed-462dc784f1b2"
-authors = ["Byron Tasseff"]
+authors = ["Byron Tasseff", "Russell Bent", "Carleton Coffrin"]
 repo = "https://github.com/lanl-ansi/PowerWaterModels.jl"
 version = "0.2.0"
 
