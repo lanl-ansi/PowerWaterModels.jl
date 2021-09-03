@@ -1,22 +1,41 @@
 {
-    "power_water_links": [
-        {
-            "load_source_id": "Load.634a",
-            "pump_source_id": "1"
+    "it": {
+        "dep": {
+            "pump_load": {
+                "1": {
+                    "pump": {
+                        "source_id": "1"
+                    },
+                    "load": {
+                        "source_id": "Load.634a"
+                    },
+                    "status": 1
+                },
+                "2": {
+                    "pump": {
+                        "source_id": "2"
+                    },
+                    "load": {
+                        "source_id": "Load.645"
+                    },
+                    "status": 1
+                },
+                "3": {
+                    "pump": {
+                        "source_id": "5"
+                    },
+                    "load": {
+                        "source_id": "Load.611"
+                    },
+                    "status": 1
+                }
+            }
         },
-        {
-            "load_source_id": "Load.645",
-            "pump_source_id": "2"
+        "pmd": {
+            "source_type": "opendss"
         },
-        {
-            "load_source_id": "Load.611",
-            "pump_source_id": "5"
+        "wm": {
+            "source_type": "epanet"
         }
-    ],
-    "power_metadata": {
-        "source_type": "opendss"
-    },
-    "water_metadata": {
-        "source_type": "epanet"
     }
 }

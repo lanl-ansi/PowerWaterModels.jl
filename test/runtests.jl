@@ -1,6 +1,6 @@
 using PowerWaterModels
 
- # Initialize shortened package names for convenience.
+# Initialize shortened package names for convenience.
 const _IM = PowerWaterModels._IM
 const _PM = PowerWaterModels._PM
 const _PMD = PowerWaterModels._PMD
@@ -13,7 +13,6 @@ const Memento = _IM.Memento
 
 # Suppress warnings during testing.
 Memento.setlevel!(Memento.getlogger(_IM), "error")
-Memento.setlevel!(Memento.getlogger(_PM), "error")
 Memento.setlevel!(Memento.getlogger(_PMD), "error")
 Memento.setlevel!(Memento.getlogger(_WM), "error")
 PowerWaterModels.logger_config!("error")
@@ -27,15 +26,26 @@ Logging.disable_logging(Logging.Info)
 
 using Test
 
-# Setup for optimizers.
-ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "acceptable_tol"=>1.0e-8, "print_level"=>0, "sb"=>"yes")
-cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, "logLevel"=>0)
+# Setup optimizers.
+ipopt = JuMP.optimizer_with_attributes(
+    Ipopt.Optimizer,
+    "acceptable_tol" => 1.0e-8,
+    "print_level" => 0,
+    "sb" => "yes",
+)
+
+cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, "logLevel" => 0)
+
 juniper = JuMP.optimizer_with_attributes(
-    Juniper.Optimizer, "nl_solver"=>ipopt, "mip_solver"=>cbc, "log_levels"=>[],
-    "branch_strategy" => :MostInfeasible, "time_limit" => 60.0)
+    Juniper.Optimizer,
+    "nl_solver" => ipopt,
+    "mip_solver" => cbc,
+    "log_levels" => [],
+    "branch_strategy" => :MostInfeasible,
+    "time_limit" => 60.0,
+)
 
 # Setup common test data paths (from dependencies).
-pm_path = joinpath(dirname(pathof(_PM)), "..")
 pmd_path = joinpath(dirname(pathof(_PMD)), "..")
 wm_path = joinpath(dirname(pathof(_WM)), "..")
 
@@ -43,11 +53,11 @@ wm_path = joinpath(dirname(pathof(_WM)), "..")
 
     include("PowerWaterModels.jl")
 
-    include("base.jl")
-
     include("io.jl")
 
     include("data.jl")
+
+    include("base.jl")
 
     include("objective.jl")
 

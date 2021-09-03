@@ -1,17 +1,15 @@
 @testset "src/io/objective.jl" begin
     @testset "objective_min_max_generation_fluctuation" begin
-        p_file = "$(pm_path)/test/data/matpower/case3.m"
+        p_file = "$(pmd_path)/test/data/matpower/case3.m"
         w_file = "$(wm_path)/test/data/epanet/multinetwork/pump-hw-lps.inp"
-        pw_file = "../test/data/json/case3-pump.json"
+        link_file = "../test/data/json/case3-pump.json"        
+        data = parse_files(p_file, w_file, link_file)
 
-        w_ext = Dict{Symbol,Any}(:pump_breakpoints => 3)
-        p_type, w_type = LinDist3FlowPowerModel, PWLRDWaterModel
-        p_data, w_data, pw_data = parse_files(p_file, w_file, pw_file)
+        pwm_type = PowerWaterModel{LinDist3FlowPowerModel, CRDWaterModel}
+        pwm = instantiate_model(data, pwm_type, build_opwf)
+        objective_min_max_generation_fluctuation(pwm)
 
-        pm, wm = instantiate_model(p_data, w_data, pw_data, p_type, w_type, build_opwf; w_ext=w_ext)
-        objective_min_max_generation_fluctuation(pm)
-
-        power_result = _IM.optimize_model!(pm, optimizer=juniper)
-        @test power_result["termination_status"] == LOCALLY_SOLVED
+        result = _IM.optimize_model!(pwm, optimizer = ipopt; relax_integrality = true)
+        @test result["termination_status"] == LOCALLY_SOLVED
     end
 end

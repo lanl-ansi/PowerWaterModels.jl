@@ -1,154 +1,164 @@
-"""
-    instantiate_model(
-        p_file, w_file, pw_file, p_type, w_type, build_method; pm_ref_extensions,
-        wm_ref_extensions, wm_ext, kwargs...)
+"Root of the PowerWaterModels formulation hierarchy."
+abstract type AbstractPowerWaterModel{
+    T1<:_PMD.AbstractUnbalancedPowerModel,
+    T2<:_WM.AbstractWaterModel,
+} <: _IM.AbstractInfrastructureModel end
 
-    Instantiates and returns PowerModelsDistribution and WaterModels modeling objects from
-    power, water, and linking input files `p_file`, `w_file`, and `pw_file`, respectively.
-    Here, `p_type` and `w_type` are the power and water modeling types, `build_method` is
-    the build method for the problem specification being considered, `pm_ref_extensions` and
-    `wm_ref_extensions` are arrays of power and water modeling extensions, and `wm_ext` is a
-    dictionary of extra arguments for constructing the WaterModels object.
-"""
+
+"A macro for adding the base PowerWaterModels fields to a type definition."
+_IM.@def pwm_fields begin
+    PowerWaterModels.@im_fields
+end
+
+
 function instantiate_model(
-    p_file::String, w_file::String, pw_file::String, p_type::Type, w_type::Type,
-    build_method::Function; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]),
-    wm_ref_extensions::Vector{<:Function}=Vector{Function}([]),
-    wm_ext::Dict{Symbol,Any}=Dict{Symbol,Any}(), kwargs...)
-    # Read power, water, and linkage data from files.
-    p_data, w_data, pw_data = parse_files(p_file, w_file, pw_file)
+    data::Dict{String,<:Any},
+    model_type::Type,
+    build_method::Function;
+    kwargs...,
+)
+    if !networks_are_consistent(data["it"][_PMD.pmd_it_name], data["it"][_WM.wm_it_name])
+        Memento.error(_LOGGER, "Multinetworks are not of the same length.")
+    end
 
-    # Instantiate the PowerWaterModels object.
-    return instantiate_model(
-        p_data, w_data, pw_data, p_type, w_type, build_method;
-        pm_ref_extensions=pm_ref_extensions, wm_ref_extensions=wm_ref_extensions,
-        wm_ext=wm_ext, kwargs...)
+    return _IM.instantiate_model(
+        data,
+        model_type,
+        build_method,
+        ref_add_core!,
+        _pwm_global_keys;
+        kwargs...,
+    )
 end
 
 
 """
-    instantiate_model(
-        p_data, w_data, pw_data, p_type, w_type, build_method; pm_ref_extensions,
-        wm_ref_extensions, wm_ext, kwargs...)
+    instantiate_model(p_file, w_file, link_file, model_type, build_method; kwargs...)
 
-    Instantiates and returns PowerModelsDistribution and WaterModels modeling objects from
-    power, water, and linking input data `p_data`, `w_data`, and `pw_data`, respectively.
-    Here, `p_type` and `w_type` are the power and water modeling types, `build_method` is
-    the build method for the problem specification being considered, `pm_ref_extensions` and
-    `wm_ref_extensions` are arrays of power and water modeling extensions, and `wm_ext` is a
-    dictionary of extra arguments for constructing the WaterModels object.
+    Instantiates and returns a PowerWaterModels modeling object from power and water input
+    files `p_file` and `w_file`. Additionally, `link_file` is an input file that links
+    power and water networks, `model_type` is the power-water modeling type, and
+    `build_method` is the build method for the problem specification being considered.
 """
 function instantiate_model(
-    p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_data::Dict{String,<:Any},
-    p_type::Type, w_type::Type, build_method::Function;
-    pm_ref_extensions::Vector{<:Function}=Vector{Function}([]),
-    wm_ref_extensions::Vector{<:Function}=Vector{Function}([]),
-    wm_ext::Dict{Symbol,Any}=Dict{Symbol,Any}(), kwargs...)
-    # Ensure network consistency, here.
-    if !networks_are_consistent(p_data, w_data)
-        Memento.error(_LOGGER, "Multinetworks are not of the same length.")
-    end
+    p_file::String,
+    w_file::String,
+    link_file::String,
+    model_type::Type,
+    build_method::Function;
+    kwargs...,
+)
+    # Read power, water, and linking data from files.
+    data = parse_files(p_file, w_file, link_file)
 
-    # Modify the loads associated with pumps.
-    p_data = _modify_loads(p_data, w_data, pw_data)
-
-    # Instantiate the WaterModels object.
-    wm = _WM.instantiate_model(
-        w_data, w_type, m->nothing; ref_extensions=wm_ref_extensions, ext=wm_ext)
-
-    # Instantiate the PowerModelsDistribution object.
-    pm = _PMD.instantiate_mc_model(
-        p_data, p_type, m->nothing; ref_extensions=pm_ref_extensions, jump_model=wm.model)
-
-    # Build the corresponding problem.
-    build_method(pm, wm)
-
-    # Return the two individual *Models objects.
-    return pm, wm
+    # Instantiate PowerModels and WaterModels modeling objects.
+    return instantiate_model(data, model_type, build_method; kwargs...)
 end
 
 
 """
     run_model(
-        p_data, w_data, pw_data, p_type, w_type, optimizer, build_method;
-        pm_solution_processors, wm_solution_processors, pm_ref_extensions,
-        wm_ref_extensions, wm_ext, kwargs...)
+        data, model_type, optimizer, build_method;
+        ref_extensions, solution_processors, kwargs...)
 
-    Instantiates and solves the joint PowerModelsDistribution and WaterModels modeling
-    objects from power, water, and linking input data `p_data`, `w_data`, and `pw_data`,
-    respectively. Here, `p_type` and `w_type` are the power and water modeling types,
-    `build_method` is the build method for the problem specification being considered,
-    `pm_solution_processors` and `wm_solution_processors` are arrays of power and water
-    model solution processors, `pm_ref_extensions` and `wm_ref_extensions` are arrays of
-    power and water modeling extensions, and `wm_ext` is a dictionary of extra arguments for
-    constructing the WaterModels modeling object. Returns a dictionary of combined results.
+    Instantiates and solves the joint PowerWaterModels model from input data `data`, where
+    `model_type` is the power-water modeling type, `build_method` is the build method for
+    the problem specification being considered, `ref_extensions` is an array of power and
+    water modeling extensions, and `solution_processors` is an array of power and water
+    modeling solution data postprocessors. Returns a dictionary of model results.
 """
 function run_model(
-    p_data::Dict{String,<:Any}, w_data::Dict{String,<:Any}, pw_data::Dict{String,<:Any},
-    p_type::Type, w_type::Type, optimizer,
-    build_method::Function; pm_solution_processors::Array=[],
-    wm_solution_processors::Array=[],
-    pm_ref_extensions::Vector{<:Function}=Vector{Function}([]),
-    wm_ref_extensions::Vector{<:Function}=Vector{Function}([]),
-    wm_ext::Dict{Symbol,Any}=Dict{Symbol,Any}(), kwargs...)
-    # Build the model and time its construction.
-    start_time = time() # Start the timer.
+    data::Dict{String,<:Any},
+    model_type::Type,
+    optimizer,
+    build_method::Function;
+    ref_extensions = [],
+    solution_processors = [],
+    relax_integrality::Bool = false,
+    kwargs...,
+)
+    start_time = time()
 
-    pm, wm = instantiate_model(
-        p_data, w_data, pw_data, p_type, w_type, build_method;
-        pm_ref_extensions=pm_ref_extensions, wm_ref_extensions=wm_ref_extensions,
-        wm_ext=wm_ext, kwargs...)
+    pwm = instantiate_model(
+        data,
+        model_type,
+        build_method;
+        ref_extensions = ref_extensions,
+        ext = get(kwargs, :ext, Dict{Symbol,Any}()),
+        setting = get(kwargs, :setting, Dict{String,Any}()),
+        jump_model = get(kwargs, :jump_model, JuMP.Model()),
+    )
 
     Memento.debug(_LOGGER, "pwm model build time: $(time() - start_time)")
 
-    # Solve the model and build the result, timing both processes.
-    start_time = time() # Start the timer.
+    start_time = time()
 
-    power_result = _IM.optimize_model!(
-        pm, optimizer=optimizer, solution_processors=pm_solution_processors)
+    solution_processors = transform_solution_processors(pwm, solution_processors)
 
-    water_result = _IM.build_result(
-        wm, power_result["solve_time"]; solution_processors=wm_solution_processors)
+    result = _IM.optimize_model!(
+        pwm,
+        optimizer = optimizer,
+        solution_processors = solution_processors,
+        relax_integrality = relax_integrality,
+    )
 
-    # Create a combined power-water result object.
-    result = power_result # Contains most of the result data.
-
-    # FIXME: There could possibly be component name clashes, here.
-    _IM.update_data!(result["solution"], water_result["solution"])
     Memento.debug(_LOGGER, "pwm model solution time: $(time() - start_time)")
 
-    # Return the combined result dictionary.
     return result
 end
 
 
-"""
-    run_model(
-        p_file, w_file, pw_file, p_type, w_type, optimizer, build_method;
-        pm_solution_processors, wm_solution_processors, pm_ref_extensions,
-        wm_ref_extensions, wm_ext, kwargs...)
+function transform_solution_processors(
+    pwm::AbstractPowerWaterModel,
+    solution_processors::Array,
+)
+    pm = _get_powermodel_from_powerwatermodel(pwm)
+    wm = _get_watermodel_from_powerwatermodel(pwm)
 
-    Instantiates and solves the joint PowerModelsDistribution and WaterModels modeling
-    objects from power, water, and linking input files `p_file`, `w_file`, and `pw_file`,
-    respectively. Here, `p_type` and `w_type` are the power and water modeling types,
-    `build_method` is the build method for the problem specification being considered,
-    `pm_solution_processors` and `wm_solution_processors` are arrays of power and water
-    model solution processors, `pm_ref_extensions` and `wm_ref_extensions` are arrays of
-    power and water modeling extensions, and `wm_ext` is a dictionary of extra arguments for
-    constructing the WaterModels modeling object. Returns a dictionary of combined results.
+    for (i, solution_processor) in enumerate(solution_processors)
+        model_type = methods(solution_processor).ms[1].sig.types[2]
+
+        if model_type <: _PMD.AbstractPowerModel
+            solution_processors[i] = (pwm, sol) -> solution_processor(pm, sol)
+        elseif model_type <: _WM.AbstractWaterModel
+            solution_processors[i] = (pwm, sol) -> solution_processor(wm, sol)
+        end
+    end
+
+    return solution_processors
+end
+
+
+"""
+    run_model(p_file, w_file, link_file, model_type, optimizer, build_method; kwargs...)
+
+    Instantiates and solves a PowerWaterModels modeling object from power and water input
+    files `p_file` and `w_file`. Additionally, `link_file` is an input file that links
+    power and water networks, `model_type` is the power-water modeling type, and
+    `build_method` is the build method for the problem specification being considered.
+    Returns a dictionary of model results.
 """
 function run_model(
-    p_file::String, w_file::String, pw_file::String, p_type::Type, w_type::Type,
-    optimizer::Union{_MOI.AbstractOptimizer, _MOI.OptimizerWithAttributes},
-    build_method::Function; pm_ref_extensions::Vector{<:Function}=Vector{Function}([]),
-    wm_ref_extensions::Vector{<:Function}=Vector{Function}([]),
-    wm_ext::Dict{Symbol,Any}=Dict{Symbol,Any}(), kwargs...)
-    # Read power, water, and linkage data from files.
-    p_data, w_data, pw_data = parse_files(p_file, w_file, pw_file)
+    p_file::String,
+    w_file::String,
+    link_file::String,
+    model_type::Type,
+    optimizer,
+    build_method::Function;
+    kwargs...,
+)
+    # Read power, water, and linking data from files.
+    data = parse_files(p_file, w_file, link_file)
 
-    # Instantiate and solve the PowerWaterModels modeling object.
-    return run_model(
-        p_data, w_data, pw_data, p_type, w_type, optimizer, build_method;
-        pm_ref_extensions=pm_ref_extensions, wm_ref_extensions=wm_ref_extensions,
-        wm_ext=wm_ext, kwargs...)
+    # Solve the model and return the result dictionary.
+    return run_model(data, model_type, optimizer, build_method; kwargs...)
+end
+
+
+function ref_add_core!(ref::Dict{Symbol,<:Any})
+    # Populate the PowerModelsDistribution portion of the `ref` dictionary.
+    _PMD.ref_add_core!(ref)
+
+    # Populate the WaterModels portion of the `ref` dictionary.
+    _WM.ref_add_core!(ref)
 end

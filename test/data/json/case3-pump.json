@@ -1,14 +1,23 @@
 {
-    "power_water_links": [
-        {
-            "load_source_id": "3",
-            "pump_source_id": "1"
+    "it": {
+        "dep": {
+            "pump_load": {
+                "1": {
+                    "pump": {
+                        "source_id": "1"
+                    },
+                    "load": {
+                        "source_id": "3"
+                    },
+                    "status": 1
+                }
+            }
+        },
+        "pmd": {
+            "source_type": "matpower"
+        },
+        "wm": {
+            "source_type": "epanet"
         }
-    ],
-    "power_metadata": {
-        "source_type": "matpower"
-    },
-    "water_metadata": {
-        "source_type": "epanet"
     }
 }

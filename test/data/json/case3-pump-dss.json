@@ -4,14 +4,20 @@
             "pump_load": {
                 "1": {
                     "pump": {
-                        "source_id": "9"
+                        "source_id": "1"
                     },
                     "load": {
-                        "source_id": "L3"
+                        "source_id": "Load.L3"
                     },
                     "status": 1
                 }
             }
+        },
+        "pmd": {
+            "source_type": "opendss"
+        },
+        "wm": {
+            "source_type": "epanet"
         }
     }
 }
