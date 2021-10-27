@@ -13,7 +13,7 @@ WaterModels = "7c60b362-08f4-5b14-8680-cd67a3e18348"
 [compat]
 InfrastructureModels = "~0.6"
 PowerModels = "~0.18"
-PowerModelsDistribution = "~0.11"
+PowerModelsDistribution = "~0.11, 0.12"
 WaterModels = "~0.8"
 julia = "^1"
 
