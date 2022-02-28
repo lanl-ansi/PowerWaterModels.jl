@@ -1,0 +1,128 @@
+[TITLE]
+Zamzam et al. (2019) network, converted to EPANET by Byron Tasseff
+
+[JUNCTIONS]
+;ID    Elev    Demand    Pattern
+  1     6.0       0.0           ;
+  2    33.0       0.0           ;
+  3    36.5     33.33     demand;
+  4    32.0     36.11     demand;
+  5    73.0     38.89     demand;
+  6    43.0     27.78     demand;
+  7    44.0     44.44     demand;
+
+[RESERVOIRS]
+;ID    Head    Pattern
+  8    -2.5           ;
+  9    -5.0           ;
+
+[TANKS]
+;ID    Elevation    InitLevel    MinLevel    MaxLevel    Diameter    MinVol    VolCurve
+ 10         75.0          2.0         0.0        60.0        25.0       0.0            ;
+
+[PIPES]
+;ID    Node1    Node2    Length    Diameter    Roughness    MinorLoss    Status
+  3        1        2    6000.0       300.0        130.0          0.0     Open;
+  4        2        3    1200.0       250.0        130.0          0.0     Open;
+  6        3        4    4300.0       300.0        130.0          0.0     Open;
+  7        1       10     400.0       250.0        130.0          0.0     Open;
+  8       10        7     400.0       250.0        130.0          0.0     Open;
+  9        7        6    5000.0       300.0        130.0          0.0     Open;
+ 10        6        3    3500.0       300.0        130.0          0.0     Open;
+
+[PUMPS]
+;ID    Node1    Node2    Parameters
+  1        8        2       HEAD 1;
+  2        9        1       HEAD 1;
+  5        4        5       HEAD 1;
+
+[VALVES]
+;ID    Node1    Node2    Diameter    Type    Setting    MinorLoss
+
+[TAGS]
+
+[DEMANDS]
+;Junction    Demand    Pattern    Category
+
+[STATUS]
+;ID    Status/Setting
+
+[PATTERNS]
+;ID          Multipliers
+ demand      1.3000 1.3250 1.3500 1.2750 1.2000 1.0500
+ demand      0.9000 0.8000 0.7000 0.6500 0.6000 0.5500
+ demand      0.5000 0.4750 0.4500 0.5000 0.5500 0.6500
+ demand      0.7500 0.8750 1.0000 1.1500 1.3000 1.2000
+
+[CURVES]
+;ID    X-Value    Y-Value
+ 1     0.000      200.0000
+ 1     150.0      150.0000
+ 1     200.0      75.00000
+
+[CONTROLS]
+
+[RULES]
+
+[ENERGY]
+ Global Efficiency  	    80.75
+ Global Price       	    1.0
+ Demand Charge      	    0.0
+
+[EMITTERS]
+;Junction  Coefficient
+
+[QUALITY]
+;Node  InitQual
+
+[SOURCES]
+;Node  Type  Quality  Pattern
+
+[REACTIONS]
+
+[MIXING]
+;Tank  Model
+
+[TIMES]
+ Duration              12:00
+ Hydraulic Timestep    0:30
+ Quality Timestep      0:30
+ Pattern Timestep      0:30
+ Pattern Start         0:00
+ Report Timestep       0:30
+ Report Start          0:00
+ Start ClockTime       12 am
+ Statistic             NONE
+
+[REPORT]
+ Status     Yes
+ Summary    No
+ Page       0
+
+[OPTIONS]
+ Units                LPS
+ Headloss             H-W
+ Specific Gravity     1.0
+ Viscosity            1.0
+ Trials               40
+ Accuracy             0.00001
+ Unbalanced           Continue 10
+ Pattern              1
+ Demand Multiplier    1.0
+ Emitter Exponent     0.5
+ Quality              None mg/L
+ Diffusivity          1.0
+ Tolerance            0.01
+
+[COORDINATES]
+;Node   X-Coord  Y-Coord
+
+[VERTICES]
+;Link   X-Coord  Y-Coord
+
+[LABELS]
+;X-Coord   Y-Coord  Label & Anchor Node
+
+[BACKDROP]
+
+[END]
