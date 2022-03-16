@@ -1,7 +1,7 @@
 PowerWaterModels.jl Change Log
 =======================
 
-### Staged
+### v0.3.0
 - Rename `run_` methods to `_solve` and add deprecation warnings.
 - Updates for InfrastructureModels v0.7.
 - Updates for PowerModelsDistribution v0.14.
