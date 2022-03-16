@@ -6,6 +6,7 @@ PowerWaterModels.jl Change Log
 - Updates for PowerModelsDistribution v0.14.
 - Updates for WaterModels v0.9.
 - Increase Julia lower bound to v1.6.
+- Replace CBC with HiGHS in tests.
 - Replace uses of `Int64` with `Int` for portability.
 
 ### v0.2.0

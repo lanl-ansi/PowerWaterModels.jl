@@ -17,7 +17,7 @@ Memento.setlevel!(Memento.getlogger(_PMD), "error")
 Memento.setlevel!(Memento.getlogger(_WM), "error")
 PowerWaterModels.logger_config!("error")
 
-import Cbc
+import HiGHS
 import Ipopt
 import Juniper
 import Logging
@@ -34,12 +34,12 @@ ipopt = JuMP.optimizer_with_attributes(
     "sb" => "yes",
 )
 
-cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, "logLevel" => 0)
+highs = JuMP.optimizer_with_attributes(HiGHS.Optimizer, "log_to_console" => false)
 
 juniper = JuMP.optimizer_with_attributes(
     Juniper.Optimizer,
     "nl_solver" => ipopt,
-    "mip_solver" => cbc,
+    "mip_solver" => highs,
     "log_levels" => [],
     "branch_strategy" => :MostInfeasible,
     "time_limit" => 60.0,
