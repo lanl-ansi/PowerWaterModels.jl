@@ -22,11 +22,11 @@ At least one optimization solver is required to run PowerWaterModels.
 The solver selected typically depends on the type of problem formulation being employed.
 Because of the `LinDist3FlowPowerModel`/`PWLRDWaterModel` joint formulation, the overall model considered in this tutorial is mixed-integer _nonconvex_ quadratic.
 One example of an optimization package capable of solving this problem is the mixed-integer nonlinear programming solver [Juniper](https://github.com/lanl-ansi/Juniper.jl).
-Juniper itself depends on the installation of a nonlinear programming solver (e.g., [Ipopt](https://github.com/jump-dev/Ipopt.jl)) and a mixed-integer linear programming solver (e.g., [CBC](https://github.com/jump-dev/Cbc.jl)).
-Installation of the JuMP interfaces to Juniper, Ipopt, and Cbc can be performed via the Julia package manager, i.e.,
+Juniper itself depends on the installation of a nonlinear programming solver (e.g., [Ipopt](https://github.com/jump-dev/Ipopt.jl)) and a mixed-integer linear programming solver (e.g., [HiGHS](https://github.com/jump-dev/HiGHS.jl)).
+Installation of the JuMP interfaces to Juniper, Ipopt, and HiGHS can be performed via the Julia package manager, i.e.,
 
 ```julia
-] add JuMP Juniper Ipopt Cbc
+] add JuMP Juniper Ipopt HiGHS
 ```
 
 ### (Optional) Installation of Gurobi
@@ -42,15 +42,15 @@ Assuming Gurobi has already been configured on your system, its Julia interface 
 After installation of the required solvers, an example optimal power-water flow problem (whose file inputs can be found in the `examples` directory within the [PowerWaterModels repository](https://github.com/lanl-ansi/PowerWaterModels.jl)) can be solved via
 
 ```julia
-using JuMP, Juniper, Ipopt, Cbc
+using JuMP, Juniper, Ipopt, HiGHS
 using PowerWaterModels
 const WM = PowerWaterModels.WaterModels
 
 # Set up the optimization solvers.
 ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0, "sb" => "yes")
-cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, "logLevel" => 0)
+highs = JuMP.optimizer_with_attributes(HiGHS.Optimizer, "log_to_console" => false)
 juniper = JuMP.optimizer_with_attributes(
-    Juniper.Optimizer, "nl_solver" => ipopt, "mip_solver" => cbc,
+    Juniper.Optimizer, "nl_solver" => ipopt, "mip_solver" => highs,
     "branch_strategy" => :MostInfeasible, "time_limit" => 60.0)
 
 # Specify paths to the power, water, and power-water linking files.
