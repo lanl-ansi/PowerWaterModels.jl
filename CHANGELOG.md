@@ -1,5 +1,12 @@
 PowerWaterModels.jl Change Log
 =======================
+
+### Staged
+- Updates for InfrastructureModels v0.7.
+- Updates for PowerModelsDistribution v0.14.
+- Updates for WaterModels v0.9.
+- Increase Julia lower bound to v1.6.
+
 ### v0.2.0
 - Updates for WaterModels v0.8.
 - Updates for PowerModelsDistribution v0.11.

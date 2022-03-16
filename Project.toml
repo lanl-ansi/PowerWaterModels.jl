@@ -11,11 +11,11 @@ PowerModelsDistribution = "d7431456-977f-11e9-2de3-97ff7677985e"
 WaterModels = "7c60b362-08f4-5b14-8680-cd67a3e18348"
 
 [compat]
-InfrastructureModels = "~0.6"
-PowerModels = "~0.18"
-PowerModelsDistribution = "~0.11"
-WaterModels = "~0.8"
-julia = "^1"
+InfrastructureModels = "~0.7"
+PowerModels = "~0.19"
+PowerModelsDistribution = "~0.14"
+WaterModels = "~0.9"
+julia = "1.6 - 1"
 
 [extras]
 Cbc = "9961bab8-2fa3-5c5a-9d89-47fab24efd76"

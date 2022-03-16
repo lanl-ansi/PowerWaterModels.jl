@@ -1,6 +1,6 @@
 @testset "src/io/objective.jl" begin
     @testset "objective_min_max_generation_fluctuation" begin
-        p_file = "$(pmd_path)/test/data/matpower/case3.m"
+        p_file = "$(pm_path)/test/data/matpower/case3.m"
         w_file = "$(wm_path)/test/data/epanet/multinetwork/pump-hw-lps.inp"
         link_file = "../test/data/json/case3-pump.json"        
         data = parse_files(p_file, w_file, link_file)

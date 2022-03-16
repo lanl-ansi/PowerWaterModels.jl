@@ -46,6 +46,7 @@ juniper = JuMP.optimizer_with_attributes(
 )
 
 # Setup common test data paths (from dependencies).
+pm_path = joinpath(dirname(pathof(_PM)), "..")
 pmd_path = joinpath(dirname(pathof(_PMD)), "..")
 wm_path = joinpath(dirname(pathof(_WM)), "..")
 

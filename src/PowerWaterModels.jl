@@ -10,7 +10,6 @@ module PowerWaterModels
     const _PMD = PowerModelsDistribution
     const _WM = WaterModels
     const _IM = InfrastructureModels
-    const _MOI = _IM._MOI # MathOptInterface
 
     # Borrow dependencies from other packages.
     const JSON = _WM.JSON

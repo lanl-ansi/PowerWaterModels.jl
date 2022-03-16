@@ -27,5 +27,5 @@ function build_pwf(pwm::AbstractPowerWaterModel)
     build_linking(pwm)
 
     # Add a feasibility-only objective.
-    JuMP.@objective(pwm.model, _MOI.FEASIBILITY_SENSE, 0.0)
+    JuMP.@objective(pwm.model, JuMP.FEASIBILITY_SENSE, 0.0)
 end

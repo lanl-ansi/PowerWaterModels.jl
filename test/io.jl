@@ -29,7 +29,7 @@
 
 
     @testset "parse_power_file" begin
-        path = "$(pmd_path)/test/data/matpower/case3.m"
+        path = "$(pm_path)/test/data/matpower/case3.m"
         data = parse_power_file(path)
 
         @test haskey(data, "multiinfrastructure")
@@ -47,7 +47,7 @@
 
 
     @testset "parse_files" begin
-        power_path = "$(pmd_path)/test/data/matpower/case3.m"
+        power_path = "$(pm_path)/test/data/matpower/case3.m"
         water_path = "$(wm_path)/test/data/epanet/snapshot/pump-hw-lps.inp"
         link_path = "../test/data/json/case3-pump.json"
         data = parse_files(power_path, water_path, link_path)

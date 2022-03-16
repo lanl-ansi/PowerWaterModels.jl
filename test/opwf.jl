@@ -1,6 +1,6 @@
 @testset "Optimal Power-Water Flow Problems" begin
     @testset "3-bus LinDist3FlowPowerModel and CRDWaterModel" begin 
-        p_file = "$(pmd_path)/test/data/matpower/case3.m"
+        p_file = "$(pm_path)/test/data/matpower/case3.m"
         w_file = "$(wm_path)/test/data/epanet/snapshot/pump-hw-lps.inp"
         link_file = "../test/data/json/case3-pump.json"
 
@@ -11,7 +11,7 @@
     end
 
     @testset "3-bus LinDist3FlowPowerModel and CRDWaterModel (Multistep)" begin
-        p_file = "$(pmd_path)/test/data/matpower/case3.m"
+        p_file = "$(pm_path)/test/data/matpower/case3.m"
         w_file = "$(wm_path)/test/data/epanet/multinetwork/pump-hw-lps.inp"
         link_file = "../test/data/json/case3-pump.json"
 
