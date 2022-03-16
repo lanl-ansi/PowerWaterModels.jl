@@ -1,4 +1,4 @@
-function constraint_fixed_load(pwm::AbstractPowerWaterModel, i::Int64; nw::Int = _IM.nw_id_default)
+function constraint_fixed_load(pwm::AbstractPowerWaterModel, i::Int; nw::Int = _IM.nw_id_default)
     pmd = _get_powermodel_from_powerwatermodel(pwm)
     z = _PMD.var(pmd, nw, :z_demand, i)
     JuMP.@constraint(pmd.model, z == 1.0)
