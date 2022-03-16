@@ -10,7 +10,6 @@ module PowerWaterModels
     const _PMD = PowerModelsDistribution
     const _WM = WaterModels
     const _IM = InfrastructureModels
-    const _MOI = _IM._MOI # MathOptInterface
 
     # Borrow dependencies from other packages.
     const JSON = _WM.JSON
@@ -55,6 +54,9 @@ module PowerWaterModels
     include("prob/linking.jl")
     include("prob/pwf.jl")
     include("prob/opwf.jl")
+
+    # Deprecated functions.
+    include("deprecated.jl")
 
     # This must come last to support automated export.
     include("core/export.jl")

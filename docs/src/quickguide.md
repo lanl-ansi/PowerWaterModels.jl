@@ -22,11 +22,11 @@ At least one optimization solver is required to run PowerWaterModels.
 The solver selected typically depends on the type of problem formulation being employed.
 Because of the `LinDist3FlowPowerModel`/`PWLRDWaterModel` joint formulation, the overall model considered in this tutorial is mixed-integer _nonconvex_ quadratic.
 One example of an optimization package capable of solving this problem is the mixed-integer nonlinear programming solver [Juniper](https://github.com/lanl-ansi/Juniper.jl).
-Juniper itself depends on the installation of a nonlinear programming solver (e.g., [Ipopt](https://github.com/jump-dev/Ipopt.jl)) and a mixed-integer linear programming solver (e.g., [CBC](https://github.com/jump-dev/Cbc.jl)).
-Installation of the JuMP interfaces to Juniper, Ipopt, and Cbc can be performed via the Julia package manager, i.e.,
+Juniper itself depends on the installation of a nonlinear programming solver (e.g., [Ipopt](https://github.com/jump-dev/Ipopt.jl)) and a mixed-integer linear programming solver (e.g., [HiGHS](https://github.com/jump-dev/HiGHS.jl)).
+Installation of the JuMP interfaces to Juniper, Ipopt, and HiGHS can be performed via the Julia package manager, i.e.,
 
 ```julia
-] add JuMP Juniper Ipopt Cbc
+] add JuMP Juniper Ipopt HiGHS
 ```
 
 ### (Optional) Installation of Gurobi
@@ -42,15 +42,15 @@ Assuming Gurobi has already been configured on your system, its Julia interface 
 After installation of the required solvers, an example optimal power-water flow problem (whose file inputs can be found in the `examples` directory within the [PowerWaterModels repository](https://github.com/lanl-ansi/PowerWaterModels.jl)) can be solved via
 
 ```julia
-using JuMP, Juniper, Ipopt, Cbc
+using JuMP, Juniper, Ipopt, HiGHS
 using PowerWaterModels
 const WM = PowerWaterModels.WaterModels
 
 # Set up the optimization solvers.
 ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0, "sb" => "yes")
-cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, "logLevel" => 0)
+highs = JuMP.optimizer_with_attributes(HiGHS.Optimizer, "log_to_console" => false)
 juniper = JuMP.optimizer_with_attributes(
-    Juniper.Optimizer, "nl_solver" => ipopt, "mip_solver" => cbc,
+    Juniper.Optimizer, "nl_solver" => ipopt, "mip_solver" => highs,
     "branch_strategy" => :MostInfeasible, "time_limit" => 60.0)
 
 # Specify paths to the power, water, and power-water linking files.
@@ -68,11 +68,11 @@ WM.solve_obbt_owf!(data, ipopt; use_relaxed_network = false,
 # Use WaterModels to set the partitioning of flows in the water network.
 WM.set_flow_partitions_num!(data, 5)
 
-# Specify the power and water formulation types separately.
+# Specify the power and water formulation types jointly.
 pwm_type = PowerWaterModel{LinDist3FlowPowerModel, PWLRDWaterModel}
 
 # Solve the joint optimal power-water flow problem and store the result.
-result = run_opwf(data, pwm_type, juniper)
+result = solve_opwf(data, pwm_type, juniper)
 ```
 
 ### (Optional) Solving the Problem with Gurobi
@@ -84,7 +84,7 @@ import Gurobi
 
 # Solve the joint optimal power-water flow problem and store its result.
 gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "NonConvex" => 2)
-result_grb = run_opwf(data, pwm_type, gurobi)
+result_grb = solve_opwf(data, pwm_type, gurobi)
 ```
 
 First, note that Gurobi solves the problem much more quickly than Juniper.
@@ -96,10 +96,10 @@ result["objective"] - result_grb["objective"] # Positive difference.
 The objective value obtained via Gurobi is _smaller_ than the one obtained via Juniper, indicating that Gurobi discovered a better solution.
 
 ## Obtaining Results
-The `run` commands in PowerWaterModels return detailed results data in the form of a Julia `Dict`.
+The `solve` commands in PowerWaterModels return detailed results data in the form of a Julia `Dict`.
 This dictionary can be saved for further processing as follows:
 ```julia
-result = run_opwf(data, pwm_type, juniper)
+result = solve_opwf(data, pwm_type, juniper)
 ```
 
 For example, the algorithm's runtime and final objective value can be accessed with
@@ -108,7 +108,7 @@ result["solve_time"] # Total solve time required (seconds).
 result["objective"] # Final objective value (in units of the objective).
 ```
 
-The `"solution"` field contains detailed information about the solution produced by the `run` method.
+The `"solution"` field contains detailed information about the solution produced by the `solve` method.
 For example, the following can be used to inspect the temporal variation in the volume of tank 1 in the water distribution network:
 ```
 tank_1_volume = Dict(nw=>data["tank"]["10"]["V"] for (nw, data) in result["solution"]["it"]["wm"]["nw"])
@@ -125,7 +125,7 @@ for (nw, network) in data["it"]["wm"]["nw"]
     network["demand"]["5"]["flow_nominal"] *= 0.90
 end
 
-result_mod = run_opwf(data, pwm_type, juniper)
+result_mod = solve_opwf(data, pwm_type, juniper)
 ```
 Note that the smaller demands in the modified problem result in an overall smaller objective value.
 For additional details about the network data, see the [PowerWaterModels Network Data Format](@ref) section.

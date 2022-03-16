@@ -17,7 +17,7 @@ function _get_load_id_from_name(
 
     if power_source_type == "matpower"
         return findfirst(
-            x -> x["source_id"][2] == parse(Int64, name),
+            x -> x["source_id"][2] == parse(Int, name),
             pmd_data["nw"][nw]["load"],
         )
     else
@@ -190,7 +190,7 @@ function _make_power_multinetwork(p_data::Dict{String,<:Any})
 end
 
 
-function _replicate_power_data(data::Dict{String,<:Any}, num_networks::Int64)
+function _replicate_power_data(data::Dict{String,<:Any}, num_networks::Int)
     pmd_data = _PMD.get_pmd_data(data)
     return _IM.replicate(pmd_data, num_networks, _PMD._pmd_math_global_keys)
 end

@@ -11,7 +11,7 @@ end
 @testset "src/core/data.jl" begin
     @testset "make_multinetwork" begin
         # Snapshot MATPOWER and snapshot EPANET networks.
-        power_path = "$(pmd_path)/test/data/matpower/case3.m"
+        power_path = "$(pm_path)/test/data/matpower/case3.m"
         water_path = "$(wm_path)/test/data/epanet/snapshot/pump-hw-lps.inp"
         link_path = "../test/data/json/case3-pump.json"
         @test consistent_multinetworks(power_path, water_path, link_path)
@@ -23,7 +23,7 @@ end
         @test consistent_multinetworks(power_path, water_path, link_path)
 
         # Snapshot MATPOWER and multistep EPANET networks.
-        power_path = "$(pmd_path)/test/data/matpower/case3.m"
+        power_path = "$(pm_path)/test/data/matpower/case3.m"
         water_path = "$(wm_path)/test/data/epanet/multinetwork/pump-hw-lps.inp"
         link_path = "../test/data/json/case3-pump.json"
         @test consistent_multinetworks(power_path, water_path, link_path)
@@ -54,7 +54,7 @@ end
     end
 
     @testset "_make_power_multinetwork" begin
-        p_data = _PM.parse_file("$(pmd_path)/test/data/matpower/case3.m")
+        p_data = _PM.parse_file("$(pm_path)/test/data/matpower/case3.m")
         p_data["time_series"] = Dict{String,Any}("num_steps" => 3)
         p_data = PowerWaterModels._make_power_multinetwork(p_data)
         @test length(p_data["nw"]) == 3

@@ -22,5 +22,5 @@ function objective_min_max_generation_fluctuation(pwm::AbstractPowerWaterModel)
         end
     end
 
-    return JuMP.@objective(pwm.model, _IM._MOI.MIN_SENSE, z);
+    return JuMP.@objective(pwm.model, _IM.JuMP.MIN_SENSE, z);
 end

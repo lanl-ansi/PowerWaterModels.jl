@@ -35,15 +35,15 @@ export with_optimizer
 import PowerWaterModels._IM.JuMP: optimizer_with_attributes
 export optimizer_with_attributes
 
-import PowerWaterModels._IM._MOI: TerminationStatusCode
+import PowerWaterModels._IM.JuMP: TerminationStatusCode
 export TerminationStatusCode
 
-import PowerWaterModels._IM._MOI: ResultStatusCode
+import PowerWaterModels._IM.JuMP: ResultStatusCode
 export ResultStatusCode
 
 for status_code_enum in [TerminationStatusCode, ResultStatusCode]
     for status_code in instances(status_code_enum)
-        @eval import PowerWaterModels._IM._MOI: $(Symbol(status_code))
+        @eval import PowerWaterModels._IM.JuMP: $(Symbol(status_code))
         @eval export $(Symbol(status_code))
     end
 end

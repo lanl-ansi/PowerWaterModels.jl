@@ -30,24 +30,24 @@ Finally, test that the package works as expected by executing
 At least one optimization solver is required to run PowerWaterModels.
 The solver selected typically depends on the type of problem formulation being employed.
 As an example, the mixed-integer nonlinear programming solver [Juniper](https://github.com/lanl-ansi/Juniper.jl) can be used for testing any of the problem formulations considered in this package.
-Juniper itself depends on the installation of a nonlinear programming solver (e.g., [Ipopt](https://github.com/jump-dev/Ipopt.jl)) and a mixed-integer linear programming solver (e.g., [CBC](https://github.com/jump-dev/Cbc.jl)).
-Installation of the JuMP interfaces to Juniper, Ipopt, and Cbc can be performed via the Julia package manager, i.e.,
+Juniper itself depends on the installation of a nonlinear programming solver (e.g., [Ipopt](https://github.com/jump-dev/Ipopt.jl)) and a mixed-integer linear programming solver (e.g., [HiGHS](https://github.com/jump-dev/HiGHS.jl)).
+Installation of the JuMP interfaces to Juniper, Ipopt, and HiGHS can be performed via the Julia package manager, i.e.,
 
 ```julia
-] add JuMP Juniper Ipopt Cbc
+] add JuMP Juniper Ipopt HiGHS
 ```
 
 After installation of the required solvers, an example optimal power-water flow problem (whose file inputs can be found in the `examples` directory within the [PowerWaterModels repository](https://github.com/lanl-ansi/PowerWaterModels.jl)) can be solved via
 
 ```julia
-using JuMP, Juniper, Ipopt, Cbc
+using JuMP, Juniper, Ipopt, HiGHS
 using PowerWaterModels
 
 # Set up the optimization solvers.
 ipopt = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0, "sb" => "yes")
-cbc = JuMP.optimizer_with_attributes(Cbc.Optimizer, "logLevel" => 0)
+highs = JuMP.optimizer_with_attributes(HiGHS.Optimizer, "log_to_console" => false)
 juniper = JuMP.optimizer_with_attributes(
-    Juniper.Optimizer, "nl_solver" => ipopt, "mip_solver" => cbc,
+    Juniper.Optimizer, "nl_solver" => ipopt, "mip_solver" => highs,
     "time_limit" => 60.0)
 
 # Specify paths to the power, water, and power-water linking files.
@@ -59,7 +59,7 @@ pw_file = "examples/data/json/zamzam.json" # Power-water linking.
 pwm_type = PowerWaterModel{LinDist3FlowPowerModel, CRDWaterModel}
 
 # Solve the joint optimal power-water flow problem and store the result.
-result = run_opwf(p_file, w_file, pw_file, pwm_type, juniper)
+result = solve_opwf(p_file, w_file, pw_file, pwm_type, juniper)
 ```
 
 After solving the problem, results can then be analyzed, e.g.,

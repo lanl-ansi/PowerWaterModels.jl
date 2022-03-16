@@ -51,7 +51,7 @@ For functions that create JuMP variables and constraints, we use the following n
 ### Problem Specifications
 
 - If a new problem specification is only needed due to the requirements of a new formulation, and is not a new type of problem, e.g., another OPWF formulation, a `build_` function with the same name as the existing formulation should be created that accepts a specific `PowerWaterModel` (multiple dispatch).
-- If a new problem specification is a new type of problem that will, e.g., accept multiple formulations, new `build_` and `run_` functions should be created that do not collide with existing problem specification functions.
+- If a new problem specification is a new type of problem that will, e.g., accept multiple formulations, new `build_` and `solve_` functions should be created that do not collide with existing problem specification functions.
 
 ### Metaprogramming
 

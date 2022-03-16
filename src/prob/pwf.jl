@@ -2,14 +2,14 @@
 
 
 "Entry point for running the power-water flow feasibility problem."
-function run_pwf(p_file, w_file, pw_file, pwm_type, optimizer; kwargs...)
-    return run_model(p_file, w_file, pw_file, pwm_type, optimizer, build_pwf; kwargs...)
+function solve_pwf(p_file, w_file, pw_file, pwm_type, optimizer; kwargs...)
+    return solve_model(p_file, w_file, pw_file, pwm_type, optimizer, build_pwf; kwargs...)
 end
 
 
 "Entry point for running the power-water flow feasibility problem."
-function run_pwf(data, pwm_type, optimizer; kwargs...)
-    return run_model(data, pwm_type, optimizer, build_pwf; kwargs...)
+function solve_pwf(data, pwm_type, optimizer; kwargs...)
+    return solve_model(data, pwm_type, optimizer, build_pwf; kwargs...)
 end
 
 
@@ -27,5 +27,5 @@ function build_pwf(pwm::AbstractPowerWaterModel)
     build_linking(pwm)
 
     # Add a feasibility-only objective.
-    JuMP.@objective(pwm.model, _MOI.FEASIBILITY_SENSE, 0.0)
+    JuMP.@objective(pwm.model, JuMP.FEASIBILITY_SENSE, 0.0)
 end
