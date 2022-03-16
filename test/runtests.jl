@@ -34,12 +34,12 @@ ipopt = JuMP.optimizer_with_attributes(
     "sb" => "yes",
 )
 
-highs = JuMP.optimizer_with_attributes(HiGHS.Optimizer, "log_to_console" => false)
+milp_solver = JuMP.optimizer_with_attributes(HiGHS.Optimizer, "log_to_console" => false)
 
 juniper = JuMP.optimizer_with_attributes(
     Juniper.Optimizer,
     "nl_solver" => ipopt,
-    "mip_solver" => highs,
+    "mip_solver" => milp_solver,
     "log_levels" => [],
     "branch_strategy" => :MostInfeasible,
     "time_limit" => 60.0,
