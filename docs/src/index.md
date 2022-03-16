@@ -59,7 +59,7 @@ pw_file = "examples/data/json/zamzam.json" # Power-water linking.
 pwm_type = PowerWaterModel{LinDist3FlowPowerModel, CRDWaterModel}
 
 # Solve the joint optimal power-water flow problem and store the result.
-result = run_opwf(p_file, w_file, pw_file, pwm_type, juniper)
+result = solve_opwf(p_file, w_file, pw_file, pwm_type, juniper)
 ```
 
 After solving the problem, results can then be analyzed, e.g.,

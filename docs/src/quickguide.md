@@ -96,7 +96,7 @@ result["objective"] - result_grb["objective"] # Positive difference.
 The objective value obtained via Gurobi is _smaller_ than the one obtained via Juniper, indicating that Gurobi discovered a better solution.
 
 ## Obtaining Results
-The `run` commands in PowerWaterModels return detailed results data in the form of a Julia `Dict`.
+The `solve` commands in PowerWaterModels return detailed results data in the form of a Julia `Dict`.
 This dictionary can be saved for further processing as follows:
 ```julia
 result = solve_opwf(data, pwm_type, juniper)
@@ -108,7 +108,7 @@ result["solve_time"] # Total solve time required (seconds).
 result["objective"] # Final objective value (in units of the objective).
 ```
 
-The `"solution"` field contains detailed information about the solution produced by the `run` method.
+The `"solution"` field contains detailed information about the solution produced by the `solve` method.
 For example, the following can be used to inspect the temporal variation in the volume of tank 1 in the water distribution network:
 ```
 tank_1_volume = Dict(nw=>data["tank"]["10"]["V"] for (nw, data) in result["solution"]["it"]["wm"]["nw"])

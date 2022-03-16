@@ -4,7 +4,7 @@
 The following examples assume that Gurobi has been installed on the system.
 Install Julia dependencies with
 ```julia
-] add CSV DataFrames Gurobi JuMP PowerWaterModels@0.11.10 WaterModels
+] add CSV DataFrames Gurobi JuMP PowerWaterModels WaterModels
 ```
 
 ## Optimal Power-Water Flow
