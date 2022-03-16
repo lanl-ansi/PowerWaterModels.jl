@@ -72,7 +72,7 @@ WM.set_flow_partitions_num!(data, 5)
 pwm_type = PowerWaterModel{LinDist3FlowPowerModel, PWLRDWaterModel}
 
 # Solve the joint optimal power-water flow problem and store the result.
-result = run_opwf(data, pwm_type, juniper)
+result = solve_opwf(data, pwm_type, juniper)
 ```
 
 ### (Optional) Solving the Problem with Gurobi
@@ -84,7 +84,7 @@ import Gurobi
 
 # Solve the joint optimal power-water flow problem and store its result.
 gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "NonConvex" => 2)
-result_grb = run_opwf(data, pwm_type, gurobi)
+result_grb = solve_opwf(data, pwm_type, gurobi)
 ```
 
 First, note that Gurobi solves the problem much more quickly than Juniper.
@@ -99,7 +99,7 @@ The objective value obtained via Gurobi is _smaller_ than the one obtained via J
 The `run` commands in PowerWaterModels return detailed results data in the form of a Julia `Dict`.
 This dictionary can be saved for further processing as follows:
 ```julia
-result = run_opwf(data, pwm_type, juniper)
+result = solve_opwf(data, pwm_type, juniper)
 ```
 
 For example, the algorithm's runtime and final objective value can be accessed with
@@ -125,7 +125,7 @@ for (nw, network) in data["it"]["wm"]["nw"]
     network["demand"]["5"]["flow_nominal"] *= 0.90
 end
 
-result_mod = run_opwf(data, pwm_type, juniper)
+result_mod = solve_opwf(data, pwm_type, juniper)
 ```
 Note that the smaller demands in the modified problem result in an overall smaller objective value.
 For additional details about the network data, see the [PowerWaterModels Network Data Format](@ref) section.

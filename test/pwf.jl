@@ -8,6 +8,10 @@
         result = solve_pwf(p_file, w_file, link_file, pwm_type, nlp_solver; relax_integrality = true)
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0.0, atol = 1.0e-6)
+
+        result = run_pwf(p_file, w_file, link_file, pwm_type, nlp_solver; relax_integrality = true)
+        @test result["termination_status"] == LOCALLY_SOLVED
+        @test isapprox(result["objective"], 0.0, atol = 1.0e-6)
     end
 
     @testset "3-bus LinDist3FlowPowerModel and CRDWaterModel (Multistep)" begin
@@ -17,6 +21,10 @@
 
         pwm_type = PowerWaterModel{LinDist3FlowPowerModel, CRDWaterModel}
         result = solve_pwf(p_file, w_file, link_file, pwm_type, nlp_solver; relax_integrality = true)
+        @test result["termination_status"] == LOCALLY_SOLVED
+        @test isapprox(result["objective"], 0.0, atol = 1.0e-6)
+
+        result = run_pwf(p_file, w_file, link_file, pwm_type, nlp_solver; relax_integrality = true)
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 0.0, atol = 1.0e-6)
     end

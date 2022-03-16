@@ -55,6 +55,9 @@ module PowerWaterModels
     include("prob/pwf.jl")
     include("prob/opwf.jl")
 
+    # Deprecated functions.
+    include("deprecated.jl")
+
     # This must come last to support automated export.
     include("core/export.jl")
 end

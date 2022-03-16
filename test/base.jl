@@ -28,4 +28,17 @@
         result = solve_model(data, pwm_type, nlp_solver, build_pwf; relax_integrality = true)
         @test result["termination_status"] == LOCALLY_SOLVED
     end
+
+    @testset "run_model (with file inputs)" begin
+        pwm_type = PowerWaterModel{LinDist3FlowPowerModel, CRDWaterModel}
+        result = run_model(p_file, w_file, link_file, pwm_type, nlp_solver, build_pwf; relax_integrality = true)
+        @test result["termination_status"] == LOCALLY_SOLVED
+    end
+
+    @testset "run_model (with network inputs)" begin
+        pwm_type = PowerWaterModel{LinDist3FlowPowerModel, CRDWaterModel}
+        data = parse_files(p_file, w_file, link_file)
+        result = run_model(data, pwm_type, nlp_solver, build_pwf; relax_integrality = true)
+        @test result["termination_status"] == LOCALLY_SOLVED
+    end
 end
