@@ -27,7 +27,7 @@ Logging.disable_logging(Logging.Info)
 using Test
 
 # Setup optimizers.
-ipopt = JuMP.optimizer_with_attributes(
+nlp_solver = JuMP.optimizer_with_attributes(
     Ipopt.Optimizer,
     "acceptable_tol" => 1.0e-8,
     "print_level" => 0,
@@ -38,7 +38,7 @@ milp_solver = JuMP.optimizer_with_attributes(HiGHS.Optimizer, "log_to_console" =
 
 juniper = JuMP.optimizer_with_attributes(
     Juniper.Optimizer,
-    "nl_solver" => ipopt,
+    "nl_solver" => nlp_solver,
     "mip_solver" => milp_solver,
     "log_levels" => [],
     "branch_strategy" => :MostInfeasible,
