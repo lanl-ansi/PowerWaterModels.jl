@@ -2,14 +2,14 @@
 
 
 "Entry point for running the optimal power-water flow problem."
-function run_opwf(p_file, w_file, pw_file, pwm_type, optimizer; kwargs...)
-    return run_model(p_file, w_file, pw_file, pwm_type, optimizer, build_opwf; kwargs...)
+function solve_opwf(p_file, w_file, pw_file, pwm_type, optimizer; kwargs...)
+    return solve_model(p_file, w_file, pw_file, pwm_type, optimizer, build_opwf; kwargs...)
 end
 
 
 "Entry point for running the optimal power-water flow problem."
-function run_opwf(data, pwm_type, optimizer; kwargs...)
-    return run_model(data, pwm_type, optimizer, build_opwf; kwargs...)
+function solve_opwf(data, pwm_type, optimizer; kwargs...)
+    return solve_model(data, pwm_type, optimizer, build_opwf; kwargs...)
 end
 
 

@@ -38,14 +38,14 @@ pwm_type = PowerWaterModel{LinDist3FlowPowerModel, PWLRDWaterModel};
 
 # Exaggerate the costs to be small in the middle of the time period.
 map(x -> data["it"]["pmd"]["nw"][string(x)]["gen"]["1"]["cost"][1] = 10.0, 9:16);
-result_1 = run_opwf(data, pwm_type, gurobi_2);
+result_1 = solve_opwf(data, pwm_type, gurobi_2);
 cost_1 = [data["it"]["pmd"]["nw"][string(nw)]["gen"]["1"]["cost"][1] / data["it"]["pmd"]["nw"][string(nw)]["settings"]["sbase"] * 1000.0 for nw in 1:24];
 pg_1 = [sqrt(sum((data["it"]["pmd"]["nw"][string(nw)]["settings"]["sbase"] * result_1["solution"]["it"]["pmd"]["nw"][string(nw)]["gen"]["1"]["pg"] / 1000.0).^2)) for nw in 1:24];
 V_1 = [result_1["solution"]["it"]["wm"]["nw"][string(nw)]["tank"]["10"]["V"] for nw in 1:25];
 
 # Exaggerate the costs to be large in the middle of the time period.
 map(x -> data["it"]["pmd"]["nw"][string(x)]["gen"]["1"]["cost"][1] = 1000.0, 9:16)
-result_2 = run_opwf(data, pwm_type, gurobi_2)
+result_2 = solve_opwf(data, pwm_type, gurobi_2)
 cost_2 = [data["it"]["pmd"]["nw"][string(nw)]["gen"]["1"]["cost"][1] / data["it"]["pmd"]["nw"][string(nw)]["settings"]["sbase"] * 1000.0 for nw in 1:24];
 pg_2 = [sqrt(sum((data["it"]["pmd"]["nw"][string(nw)]["settings"]["sbase"] * result_2["solution"]["it"]["pmd"]["nw"][string(nw)]["gen"]["1"]["pg"] / 1000.0).^2)) for nw in 1:24];
 V_2 = [result_2["solution"]["it"]["wm"]["nw"][string(nw)]["tank"]["10"]["V"] for nw in 1:25];

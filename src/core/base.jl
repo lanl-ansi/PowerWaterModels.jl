@@ -57,7 +57,7 @@ end
 
 
 """
-    run_model(
+    solve_model(
         data, model_type, optimizer, build_method;
         ref_extensions, solution_processors, kwargs...)
 
@@ -67,7 +67,7 @@ end
     water modeling extensions, and `solution_processors` is an array of power and water
     modeling solution data postprocessors. Returns a dictionary of model results.
 """
-function run_model(
+function solve_model(
     data::Dict{String,<:Any},
     model_type::Type,
     optimizer,
@@ -130,7 +130,7 @@ end
 
 
 """
-    run_model(p_file, w_file, link_file, model_type, optimizer, build_method; kwargs...)
+    solve_model(p_file, w_file, link_file, model_type, optimizer, build_method; kwargs...)
 
     Instantiates and solves a PowerWaterModels modeling object from power and water input
     files `p_file` and `w_file`. Additionally, `link_file` is an input file that links
@@ -138,7 +138,7 @@ end
     `build_method` is the build method for the problem specification being considered.
     Returns a dictionary of model results.
 """
-function run_model(
+function solve_model(
     p_file::String,
     w_file::String,
     link_file::String,
@@ -151,7 +151,7 @@ function run_model(
     data = parse_files(p_file, w_file, link_file)
 
     # Solve the model and return the result dictionary.
-    return run_model(data, model_type, optimizer, build_method; kwargs...)
+    return solve_model(data, model_type, optimizer, build_method; kwargs...)
 end
 
 
