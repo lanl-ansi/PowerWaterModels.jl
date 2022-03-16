@@ -68,7 +68,7 @@ WM.solve_obbt_owf!(data, ipopt; use_relaxed_network = false,
 # Use WaterModels to set the partitioning of flows in the water network.
 WM.set_flow_partitions_num!(data, 5)
 
-# Specify the power and water formulation types separately.
+# Specify the power and water formulation types jointly.
 pwm_type = PowerWaterModel{LinDist3FlowPowerModel, PWLRDWaterModel}
 
 # Solve the joint optimal power-water flow problem and store the result.
