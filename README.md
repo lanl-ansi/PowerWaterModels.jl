@@ -9,6 +9,7 @@ PowerWaterModels.jl is a Julia/JuMP package for joint optimization of power and 
 **Core Problem Specifications**
 * Power-Water Flow (pwf)
 * Optimal Power-Water Flow (opwf)
+* Optimal Power-Water Network Expansion (ne)
 
 ## Documentation
 The package [documentation](https://lanl-ansi.github.io/PowerWaterModels.jl/stable/) includes a [quick start guide](https://lanl-ansi.github.io/PowerWaterModels.jl/stable/quickguide).

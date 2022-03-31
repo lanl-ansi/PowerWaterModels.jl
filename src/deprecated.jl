@@ -12,6 +12,12 @@ function run_opwf(args...; kwargs...)
 end
 
 
+function run_ne(args...; kwargs...)
+    @warn("`run_ne` has been replaced with `solve_ne`", maxlog = 1)
+    solve_ne(args...; kwargs...)
+end
+
+
 function run_pwf(args...; kwargs...)
     @warn("`run_pwf` has been replaced with `solve_pwf`", maxlog = 1)
     solve_pwf(args...; kwargs...)

@@ -66,4 +66,6 @@ wm_path = joinpath(dirname(pathof(_WM)), "..")
 
     include("opwf.jl")
 
+    include("ne.jl")
+
 end
