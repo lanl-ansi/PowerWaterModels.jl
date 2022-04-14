@@ -17,7 +17,7 @@ end
 function build_ne(pwm::AbstractPowerWaterModel)
     # Power-only related variables and constraints.
     pmd = _get_powermodel_from_powerwatermodel(pwm)
-    _PMD.build_mn_mc_mld_simple(pmd)
+    _PMD.build_mn_mc_mld_simple_ne(pmd)
 
     # Water-only related variables and constraints.
     wm = _get_watermodel_from_powerwatermodel(pwm)
@@ -26,6 +26,6 @@ function build_ne(pwm::AbstractPowerWaterModel)
     # Power-water linking constraints.
     build_linking(pwm)
 
-    # Add the objective that minimizes power generation costs.
-    _PMD.objective_mc_min_fuel_cost(pmd)
+    # Add the objective that minimizes joint network expansion costs.
+    objective_ne(pwm)
 end

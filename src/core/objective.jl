@@ -1,5 +1,5 @@
 """
-    objective_min_max_generation_fluctuation(pm::AbstractPowerModel)
+    objective_min_max_generation_fluctuation(pm::AbstractPowerWaterModel)
 """
 function objective_min_max_generation_fluctuation(pwm::AbstractPowerWaterModel)
     pmd = _get_powermodel_from_powerwatermodel(pwm)
@@ -23,4 +23,19 @@ function objective_min_max_generation_fluctuation(pwm::AbstractPowerWaterModel)
     end
 
     return JuMP.@objective(pwm.model, _IM.JuMP.MIN_SENSE, z);
+end
+
+
+"""
+    objective_ne(pm::AbstractPowerWaterModel)
+"""
+function objective_ne(pwm::AbstractPowerWaterModel)
+    pmd = _get_powermodel_from_powerwatermodel(pwm)
+    power_ne_cost = _PMD.objective_ne(pmd)
+
+    wm = _get_watermodel_from_powerwatermodel(pwm)
+    water_ne_cost = _WM.objective_ne(wm)
+
+    total_ne_cost = power_ne_cost + water_ne_cost
+    return JuMP.@objective(pwm.model, JuMP.MIN_SENSE, total_ne_cost)
 end
