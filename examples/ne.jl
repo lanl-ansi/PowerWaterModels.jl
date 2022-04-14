@@ -37,18 +37,6 @@ WM.solve_obbt!(data, WM.build_mn_ne, gurobi_1; model_type = LRDWaterModel,
 
 # Specify the following optimization models' types.
 pwm_type = PowerWaterModel{NFAUPowerModel, LRDWaterModel};
-result = solve_opwf(data, pwm_type, gurobi_2); # This should turn on all short pipes.
 
-# This should turn on the smallest short pipe.
+# Solve the network expansion problem.
 result = solve_ne(data, pwm_type, gurobi_2);
-
-# data_copy = deepcopy(data);
-
-# # This should turn on the next largest short pipe.
-# for (nw, nw_data) in data_copy["it"]["wm"]["nw"]
-#    map(x -> x["flow_nominal"] *= 1.005, values(nw_data["demand"]))
-#    map(x -> x["flow_min"] *= 1.005, values(nw_data["demand"]))
-#    map(x -> x["flow_max"] *= 1.005, values(nw_data["demand"]))
-# end
-
-# result = solve_ne(data_copy, pwm_type, gurobi_2);
