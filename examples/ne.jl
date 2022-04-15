@@ -1,5 +1,3 @@
-using Revise
-
 import CSV
 import Gurobi
 import JuMP
@@ -19,7 +17,7 @@ gurobi_2 = JuMP.optimizer_with_attributes(() -> Gurobi.Optimizer(env), "TimeLimi
 # Specify paths to the input data files.
 power_file = "examples/data/opendss/IEEE13_CDPSM.dss";
 water_file = "examples/data/epanet/cohen-ne.inp";
-linking_file = "examples/data/json/water-expansion.json";
+linking_file = "examples/data/json/expansion.json";
 
 # Parse the input files into a dictionary.
 data = parse_files(power_file, water_file, linking_file);
