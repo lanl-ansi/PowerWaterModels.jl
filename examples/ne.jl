@@ -4,6 +4,8 @@ import JuMP
 import WaterModels
 
 using DataFrames
+
+using Revise
 using PowerWaterModels
 
 const WM = WaterModels
@@ -23,18 +25,21 @@ linking_file = "examples/data/json/expansion.json";
 data = parse_files(power_file, water_file, linking_file);
 WM.propagate_topology_status!(data);
 
+for (nw, nw_data) in data["it"]["pmd"]["nw"]
+    for (i, load) in nw_data["load"]
+        load["pd"] = load["pd"] .* 1.0
+    end
+end
+
+
 # Set the partitioning for flow variables in the water model.
 WM.set_flow_partitions_num!(data, 5);
 
 # Initialize a flow partitioning function to be used in water OBBT.
 flow_partition_func = x -> WM.set_flow_partitions_num!(x, 5);
 
-# Generate WaterModels data that includes optimization-based bounds.
-WM.solve_obbt!(data, WM.build_mn_ne, gurobi_1; model_type = LRDWaterModel,
-   solve_relaxed = true, max_iter = 3, flow_partition_func = flow_partition_func);
-
 # Specify the following optimization models' types.
 pwm_type = PowerWaterModel{NFAUPowerModel, LRDWaterModel};
 
 # Solve the network expansion problem.
-result = solve_ne(data, pwm_type, gurobi_2);
+result = solve_opwf_ne(data, pwm_type, gurobi_2);
