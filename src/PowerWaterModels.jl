@@ -54,6 +54,7 @@ module PowerWaterModels
     include("prob/linking.jl")
     include("prob/pwf.jl")
     include("prob/opwf.jl")
+    include("prob/opwf_ne.jl")
     include("prob/ne.jl")
 
     # Deprecated functions.

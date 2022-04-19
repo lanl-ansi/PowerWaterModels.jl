@@ -1,6 +1,7 @@
 {
     "it": {
         "dep": {
+            "budget_ne": 10000.0,
             "pump_load": {
                 "1": {
                     "pump": {
