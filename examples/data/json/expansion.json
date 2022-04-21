@@ -79,10 +79,10 @@
                         "11"
                     ],
                     "name": "11",
-                    "elevation": 75.0,
-                    "head_min": 75.0,
-                    "head_max": 135.0,
-                    "head_nominal": 75.0,
+                    "elevation": 35.0,
+                    "head_min": 35.0,
+                    "head_max": 65.0,
+                    "head_nominal": 45.0,
                     "status": 1,
                     "index": 11
                 },
@@ -92,10 +92,10 @@
                         "12"
                     ],
                     "name": "12",
-                    "elevation": 75.0,
-                    "head_min": 75.0,
-                    "head_max": 135.0,
-                    "head_nominal": 75.0,
+                    "elevation": 35.0,
+                    "head_min": 35.0,
+                    "head_max": 65.0,
+                    "head_nominal": 45.0,
                     "status": 1,
                     "index": 12
                 },
@@ -105,13 +105,39 @@
                         "13"
                     ],
                     "name": "13",
-                    "elevation": 75.0,
-                    "head_min": 75.0,
-                    "head_max": 135.0,
-                    "head_nominal": 75.0,
+                    "elevation": 35.0,
+                    "head_min": 35.0,
+                    "head_max": 65.0,
+                    "head_nominal": 45.0,
                     "status": 1,
                     "index": 13
+                },
+                "14": {
+                    "source_id": [
+                        "tank",
+                        "14"
+                    ],
+                    "name": "14",
+                    "elevation": 35.0,
+                    "head_min": 35.0,
+                    "head_max": 65.0,
+                    "head_nominal": 45.0,
+                    "status": 1,
+                    "index": 14
                 }
+                "15": {
+                    "source_id": [
+                        "tank",
+                        "15"
+                    ],
+                    "name": "15",
+                    "elevation": 35.0,
+                    "head_min": 35.0,
+                    "head_max": 65.0,
+                    "head_nominal": 45.0,
+                    "status": 1,
+                    "index": 15
+                },
             },
             "ne_short_pipe": {
                 "11": {
@@ -124,7 +150,7 @@
                     "index": 11,
                     "node_fr": 11,
                     "node_to": 10,
-                    "construction_cost": 10.0
+                    "construction_cost": 341698.84
                 },
                 "12": {
                     "source_id": [
@@ -136,7 +162,7 @@
                     "index": 12,
                     "node_fr": 12,
                     "node_to": 10,
-                    "construction_cost": 100.0
+                    "construction_cost": 928296.29
                 },
                 "13": {
                     "source_id": [
@@ -148,7 +174,31 @@
                     "index": 13,
                     "node_fr": 13,
                     "node_to": 10,
-                    "construction_cost": 1000.0
+                    "construction_cost": 2521910.83
+                },
+                "14": {
+                    "source_id": [
+                        "ne_short_pipe",
+                        "14"
+                    ],
+                    "name": "14",
+                    "status": -1,
+                    "index": 14,
+                    "node_fr": 14,
+                    "node_to": 10,
+                    "construction_cost": 6851297.66
+                },
+                "15": {
+                    "source_id": [
+                        "ne_short_pipe",
+                        "15"
+                    ],
+                    "name": "15",
+                    "status": -1,
+                    "index": 15,
+                    "node_fr": 15,
+                    "node_to": 10,
+                    "construction_cost": 12293393.38
                 }
             },
             "tank": {
@@ -161,12 +211,12 @@
                     "node": 11,
                     "index": 11,
                     "min_level": 0.0,
-                    "max_level": 60.0,
+                    "max_level": 30.0,
                     "status": 1,
                     "dispatchable": false,
-                    "init_level": 0.0,
+                    "init_level": 30.0,
                     "min_vol": 0.0,
-                    "diameter": 10.0
+                    "diameter": 5.0
                 },
                 "12": {
                     "source_id": [
@@ -177,12 +227,12 @@
                     "node": 12,
                     "index": 12,
                     "min_level": 0.0,
-                    "max_level": 60.0,
+                    "max_level": 30.0,
                     "status": 1,
                     "dispatchable": false,
-                    "init_level": 0.0,
+                    "init_level": 30.0,
                     "min_vol": 0.0,
-                    "diameter": 50.0
+                    "diameter": 10.0
                 },
                 "13": {
                     "source_id": [
@@ -193,12 +243,44 @@
                     "node": 13,
                     "index": 13,
                     "min_level": 0.0,
-                    "max_level": 60.0,
+                    "max_level": 30.0,
                     "status": 1,
                     "dispatchable": false,
-                    "init_level": 0.0,
+                    "init_level": 15.625,
                     "min_vol": 0.0,
-                    "diameter": 100.0
+                    "diameter": 20.0
+                },
+                "14": {
+                    "source_id": [
+                        "tank",
+                        "14"
+                    ],
+                    "name": "14",
+                    "node": 14,
+                    "index": 14,
+                    "min_level": 0.0,
+                    "max_level": 30.0,
+                    "status": 1,
+                    "dispatchable": false,
+                    "init_level": 3.90625,
+                    "min_vol": 0.0,
+                    "diameter": 40.0
+                },
+                "15": {
+                    "source_id": [
+                        "tank",
+                        "15"
+                    ],
+                    "name": "15",
+                    "node": 15,
+                    "index": 15,
+                    "min_level": 0.0,
+                    "max_level": 30.0,
+                    "status": 1,
+                    "dispatchable": false,
+                    "init_level": 1.73611,
+                    "min_vol": 0.0,
+                    "diameter": 60.0
                 }
             },
             "source_type": "epanet"
