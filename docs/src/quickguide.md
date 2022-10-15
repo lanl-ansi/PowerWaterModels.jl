@@ -116,6 +116,20 @@ tank_1_volume = Dict(nw=>data["tank"]["10"]["V"] for (nw, data) in result["solut
 
 For more information about PowerWaterModels result data, see the [PowerWaterModels Result Data Format](@ref) section.
 
+## Accessing Different Formulations
+As an example, to reformulate the previous problem using the `NFAUPowerModel` model for power flow and the `LRDWaterModel` model for water flow, which can then be jointly solved with HiGHS, the following can be executed:
+```julia
+# Instantiate a verbose version of the HiGHS optimizer.
+highs_verbose = JuMP.optimizer_with_attributes(HiGHS.Optimizer, "log_to_console" => true)
+
+# Specify the power and water formulation types jointly.
+pwm_type_reformulation = PowerWaterModel{NFAUPowerModel, LRDWaterModel}
+
+# Solve the joint optimal power-water flow problem and store the result.
+result_reformulation = solve_opwf(data, pwm_type_reformulation, highs_verbose)
+```
+
+
 ## Modifying Network Data
 The following example demonstrates one way to perform PowerWaterModels solves while modifying network data.
 ```julia
@@ -127,5 +141,25 @@ end
 
 result_mod = solve_opwf(data, pwm_type, juniper)
 ```
-Note that the smaller demands in the modified problem result in an overall smaller objective value.
+Note that the smaller demands in the modified problem result in an overall smaller objective value, i.e.,
+```julia
+# The comparison below should return `true`.
+result_mod["objective"] < result["objective"]
+```
 For additional details about the network data, see the [PowerWaterModels Network Data Format](@ref) section.
+
+## Alternate Methods for Building and Solving Models
+The following example demonstrates how to decompose a `solve_opwf` call into separate model building and solving steps.
+This allows for inspection of the JuMP model created by PowerWaterModels:
+```julia
+# Instantiate the model.
+pwm = instantiate_model(data, pwm_type, build_opwf);
+
+# Print the contents of the JuMP model.
+println(pwm.model)
+```
+The problem can then be solved and its two result dictionaries can be stored via:
+```julia
+# Solve the PowerWaterModels problem and store the result.
+result = PowerWaterModels._IM.optimize_model!(pwm, optimizer = juniper)
+```
