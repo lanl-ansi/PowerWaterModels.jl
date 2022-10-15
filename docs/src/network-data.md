@@ -17,31 +17,40 @@ This is represented by an interdependency type named `"pump_load"`.
 Aside from the interdependency definitions, additional `"source_type"` entries are added to the PowerModelsDistribution (`"pmd"`) and WaterModels (`"wm"`) subdictionaries to assist in ultimately transforming and linking power and water network inputs.
 ```json
 {
-  "it": {
-    "dep": {
-      "pump_load": {
-        "1": {
-          "pump": {
-            "source_id": <String> # Index in the source water network data file of the pump that is being modeled in the interdependency.
-          },
-          "load": {
-            "source_id": <String> # Index in the source power network data file of the load that is being modeled in the interdependency.
-          },
-          "status": <Int64> # Indicator (-1, 0, or 1) specifying if the status of the interdependency is unknown (-1, i.e., potentially on _or_ off), inactive (0, i.e., off) or active (1, i.e., on).
+    "it": {
+        "dep": {
+            "pump_load": {
+                "1": {
+                    "pump": {
+                        "source_id": <String> # Index in the source water
+                        # network data file of the pump that is being modeled
+                        # in the interdependency.
+                    },
+                    "load": {
+                        "source_id": <String> # Index in the source power
+                        # network data file of the load that is being modeled
+                        # in the interdependency.
+                    },
+                    "status": <Int64> # Indicator (-1, 0, or 1) specifying if
+                    # the status of the interdependency is unknown (-1, i.e.,
+                    # potentially on _or_ off), inactive (0, i.e., off) or 
+                    # active (1, i.e., on).
+                },
+                "2": {
+                    ...
+                },
+                ...
+            }
         },
-        "2": {
-          ...
-        },
+    "pmd": {
+        "source_type": <String> # Type of input file used to describe the power
+        # distribution network model. Can be "opendss" or "matpower".
+        ...
+    },
+    "wm": {
+        "source_type": <String> # Type of input file used to describe the water
+        # distribution network model. Can currently only be set to "epanet".
         ...
     }
-  },
-  "pmd": {
-    "source_type": <String> # Type of input file used to describe the power distribution network model. Can be "opendss" or "matpower".
-    ...
-  },
-  "wm": {
-    "source_type": <String> # Type of input file used to describe the water distribution network model. Can be "epanet" with possible future extensions.
-    ...
-  }
 }
 ```
