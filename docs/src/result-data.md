@@ -66,7 +66,7 @@ flow_per_unit = result["solution"]["it"]["wm"]["nw"]["1"]["pump"]["2"]["q"]
 # Get the per-unit scalar used to convert back to SI units.
 base_flow = data["it"]["wm"]["base_flow"]
 
-# Compute the volumetric flow rate in cubic meters per second.
+# Compute the volumetric flow rate in SI units (cubic meters per second).
 base_flow * flow_per_unit
 
 # Compute the volumetric flow rate in liters per second.
