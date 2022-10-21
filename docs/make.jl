@@ -18,7 +18,6 @@ makedocs(
             "Problem Specifications" => "specifications.md",
             "Modeling Components" => [
                 "Objective" => "objective.md",
-                "Variables" => "variables.md",
                 "Constraints" => "constraints.md"
             ],
             "File I/O" => "parser.md"
