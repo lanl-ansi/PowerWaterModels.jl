@@ -1,6 +1,10 @@
 # Constraints
-```@meta
-CurrentModule = PowerWaterModels
-```
+We define the following methods to provide a compositional approach toward defining linking constraints used in coupled power-water models.
+Such methods should always be defined over `AbstractPowerWaterModel`.
 
-## Linking Constraints
+```@autodocs
+Modules = [PowerWaterModels]
+Pages   = ["core/constraint.jl"]
+Order   = [:type, :function]
+Private  = true
+```

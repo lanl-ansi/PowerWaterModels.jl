@@ -10,24 +10,19 @@ makedocs(
         "Manual" => [
             "Getting Started" => "quickguide.md",
             "Network Data Format" => "network-data.md",
-            "Result Data Format" => "result-data.md",
-            "Mathematical Models" => "math-model.md"
+            "Result Data Format" => "result-data.md"
         ],
         "Library" => [
             "Network Formulations" => "formulations.md",
             "Problem Specifications" => "specifications.md",
             "Modeling Components" => [
-                "Power Model" => "power-model.md",
-                "Water Model" => "water-model.md",
                 "Objective" => "objective.md",
-                "Variables" => "variables.md",
                 "Constraints" => "constraints.md"
             ],
-            "Relaxation Schemes" => "relaxations.md",
             "File I/O" => "parser.md"
         ],
         "Developer" => "developer.md",
-        "Benchmarks" => "benchmarks.md"
+        "Examples" => "examples.md"
     ]
 )
 
