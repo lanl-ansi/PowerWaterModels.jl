@@ -25,13 +25,13 @@ time index ``t \\in \\mathcal{T}``, a value of one indicates the maximum load
 is being served (denoted as ``pd``). Any other value will represent some
 proportion of this maximum. Linking pump power to load is thus modeled via
 ```math
-P_{j}(\\cdot) = L_{i}(z_{it}, pd_{it}),
-\\, \\forall (i, j) \\in \\mathcal{D},
+P_{jt} = z_{it} \\sum_{c \\in \\mathcal{C}} pd_{ict}, \\,
+\\forall (i, j) \\in \\mathcal{D}, \\, \\forall t \\in \\mathcal{T},
 ```
 where ``\\mathcal{D}`` is the set of interdependencies, linking loads,
 ``i \\in \\mathcal{L}``, to pumps, ``j \\in \\mathcal{P}``. Here, ``P_{j}``
-is some function that represents pump power, which is potentially nonlinear,
-and ``L_{i}`` is the function for computing the corresponding power load.
+is a variable that represents pump power and ``\\mathcal{C}`` is the set of
+conductors, i.e., power is bounded by ``\\sum_{c \\in \\mathcal{C}} pd_{ict}``.
 """
 function constraint_pump_load(pwm::AbstractPowerWaterModel, i::Int, a::Int; nw::Int = _IM.nw_id_default)
     power_load = _get_power_load_expression(pwm, i, nw = nw)
