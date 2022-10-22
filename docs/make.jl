@@ -10,8 +10,7 @@ makedocs(
         "Manual" => [
             "Getting Started" => "quickguide.md",
             "Network Data Format" => "network-data.md",
-            "Result Data Format" => "result-data.md",
-            "Mathematical Models" => "math-model.md"
+            "Result Data Format" => "result-data.md"
         ],
         "Library" => [
             "Network Formulations" => "formulations.md",
