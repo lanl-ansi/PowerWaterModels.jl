@@ -13,9 +13,10 @@ const Memento = _IM.Memento
 
 # Suppress warnings during testing.
 Memento.setlevel!(Memento.getlogger(_IM), "error")
-Memento.setlevel!(Memento.getlogger(_PMD), "error")
+Memento.setlevel!(Memento.getlogger(_PM), "error")
 Memento.setlevel!(Memento.getlogger(_WM), "error")
 PowerWaterModels.logger_config!("error")
+_PMD.silence!()
 
 import HiGHS
 import Ipopt
