@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Developer · PowerWaterModels</title><script async src="https://www.googletagmanager.com/gtag/js?id=UA-367975-10"></script><script>  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-367975-10', {'page_path': location.pathname + location.search + location.hash});
+</script><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">PowerWaterModels</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../quickguide/">Getting Started</a></li><li><a class="tocitem" href="../network-data/">Network Data Format</a></li><li><a class="tocitem" href="../result-data/">Result Data Format</a></li></ul></li><li><span class="tocitem">Library</span><ul><li><a class="tocitem" href="../formulations/">Network Formulations</a></li><li><a class="tocitem" href="../specifications/">Problem Specifications</a></li><li><input class="collapse-toggle" id="menuitem-3-3" type="checkbox"/><label class="tocitem" for="menuitem-3-3"><span class="docs-label">Modeling Components</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../objective/">Objective</a></li><li><a class="tocitem" href="../constraints/">Constraints</a></li></ul></li><li><a class="tocitem" href="../parser/">File I/O</a></li></ul></li><li class="is-active"><a class="tocitem" href>Developer</a><ul class="internal"><li><a class="tocitem" href="#Data-Processing-Functions"><span>Data Processing Functions</span></a></li><li><a class="tocitem" href="#Compositional-Problems"><span>Compositional Problems</span></a></li></ul></li><li><a class="tocitem" href="../examples/">Examples</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Developer</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Developer</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/lanl-ansi/PowerWaterModels.jl/blob/master/docs/src/developer.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Developer-Documentation"><a class="docs-heading-anchor" href="#Developer-Documentation">Developer Documentation</a><a id="Developer-Documentation-1"></a><a class="docs-heading-anchor-permalink" href="#Developer-Documentation" title="Permalink"></a></h1><h2 id="Data-Processing-Functions"><a class="docs-heading-anchor" href="#Data-Processing-Functions">Data Processing Functions</a><a id="Data-Processing-Functions-1"></a><a class="docs-heading-anchor-permalink" href="#Data-Processing-Functions" title="Permalink"></a></h2><p>The PowerWaterModels data format allows the user to specify power network data, water network data, and data related to the interdependencies between power and water systems. PowerWaterModels relies on the automated data processing routines of <a href="https://github.com/lanl-ansi/PowerModelsDistribution.jl">PowerModelsDistribution</a> and <a href="https://github.com/lanl-ansi/WaterModels.jl">WaterModels</a>, which include capabilities for status propagation, nondimensionalization, topology correction, etc. However, these capabilities are typically used on independent infrastructure data, whereas PowerWaterModels must join these data. Thus, in preprocessing routines, it is recommended that capabilities be invoked explictly so that external dependencies are accounted for. For example, the core data parsing function <code>parse_files</code> performs the following operations:</p><pre><code class="language-julia hljs">function parse_files(power_path::String, water_path::String, link_path::String)
+    joint_network_data = parse_link_file(link_path)
+    _IM.update_data!(joint_network_data, parse_power_file(power_path))
+    _IM.update_data!(joint_network_data, parse_water_file(water_path))
+    correct_network_data!(joint_network_data)
+
+    # Store whether or not each network uses per-unit data.
+    p_per_unit = get(joint_network_data[&quot;it&quot;][_PMD.pmd_it_name], &quot;per_unit&quot;, false)
+    w_per_unit = get(joint_network_data[&quot;it&quot;][_WM.wm_it_name], &quot;per_unit&quot;, false)
+
+    # Make the power and water data sets multinetwork.
+    joint_network_data_mn = make_multinetwork(joint_network_data)
+
+    # Prepare and correct pump load linking data.
+    assign_pump_loads!(joint_network_data_mn)
+
+    # Modify variable load properties in the power network.
+    _modify_loads!(joint_network_data_mn)
+
+    # Return the network dictionary.
+    return joint_network_data_mn
+end</code></pre><p>Here, the <code>parse_power_file</code> and <code>parse_water_file</code> use custom routines to parse and transform the input data, i.e.,</p><pre><code class="language-julia hljs">function parse_power_file(file_path::String)
+    if split(file_path, &quot;.&quot;)[end] == &quot;m&quot; # If reading a MATPOWER file.
+        data = _PM.parse_file(file_path)
+        _scale_loads!(data, 1.0 / 3.0)
+        _PMD.make_multiconductor!(data, 3)
+    else
+        data = _PMD.parse_file(file_path)
+    end
+
+    return _IM.ismultiinfrastructure(data) ? data :
+          Dict(&quot;multiinfrastructure&quot; =&gt; true, &quot;it&quot; =&gt; Dict(_PMD.pmd_it_name =&gt; data))
+end
+
+
+function parse_water_file(file_path::String; skip_correct::Bool = true)
+    data = _WM.parse_file(file_path; skip_correct = skip_correct)
+    return _IM.ismultiinfrastructure(data) ? data :
+           Dict(&quot;multiinfrastructure&quot; =&gt; true, &quot;it&quot; =&gt; Dict(_WM.wm_it_name =&gt; data))
+end</code></pre><p>After these routines are called, <code>correct_network_data!</code> executes various data and topology correction routines on power, water, and linking data. Then, <code>make_multinetwork</code> ensures that the temporal dimension of each infrastructure and interdependency subdictionary match. Finally, interdependency data are corrected and modified via <code>assign_pump_loads!</code> and <code>_modify_loads!</code> to ensure linking constraints will be modeled appropriately.</p><h2 id="Compositional-Problems"><a class="docs-heading-anchor" href="#Compositional-Problems">Compositional Problems</a><a id="Compositional-Problems-1"></a><a class="docs-heading-anchor-permalink" href="#Compositional-Problems" title="Permalink"></a></h2><p>A best practice is to adopt a compositional approach for building problems in PowerWaterModels, leveraging problem definitions of PowerModelsDistribution and WaterModels. This helps lessen the impact of breaking changes across independent infrastructure packages. For example, the joint optimal power-water flow problem invokes similar problems of PowerModelsDistribution and WaterModels directly with routines like</p><pre><code class="language-julia hljs"># Power-only related variables and constraints.
+pmd = _get_powermodel_from_powerwatermodel(pwm)
+_PMD.build_mn_mc_mld_simple(pmd)
+
+# Water-only related variables and constraints.
+wm = _get_watermodel_from_powerwatermodel(pwm)
+_WM.build_mn_owf(wm)
+
+# Power-water linking constraints.
+build_linking(pwm)
+
+# Add the objective that minimizes power generation costs.
+_PMD.objective_mc_min_fuel_cost(pmd)</code></pre><p>Compared to the <code>PowerModelsDistribution</code> (<code>_PMD</code>) and <code>WaterModels</code> (<code>_WM</code>) routines, the PowerWaterModels routines only specify interdependency constraints.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../parser/">« File I/O</a><a class="docs-footer-nextpage" href="../examples/">Examples »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.23 on <span class="colophon-date" title="Tuesday 20 December 2022 05:29">Tuesday 20 December 2022</span>. Using Julia version 1.8.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
