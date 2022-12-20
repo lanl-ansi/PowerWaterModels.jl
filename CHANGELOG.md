@@ -1,5 +1,11 @@
 PowerWaterModels.jl Change Log
-=======================
+==============================
+
+### staged
+- nothing
+
+### v0.3.1
+- Improve facade pattern implementation
 
 ### v0.3.0
 - Update documentation.
